@@ -36,6 +36,7 @@
 
     <link rel="stylesheet" href="~/css/dashboard-layout.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/datatable-theme.css" />
     @await RenderSectionAsync("Styles", required: false)
 
 </head>
@@ -49,6 +50,10 @@
             if (localStorage.getItem("theme") === "dark") {
                 document.body.classList.add("dark-mode");
             }
+             window.NaqiDashboard = {
+                   currentCulture: '@CultureHelper.CurrentCulture',
+                   isRtl: @CultureHelper.IsRtl.ToString().ToLower()
+               };
         })();
     </script>
     <div class="dashboard-shell">
@@ -159,8 +164,10 @@
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/datetime-common.js"></script>
 
     <script src="~/js/dashboard-layout.js"></script>
+    <script src="~/js/datatable-common.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

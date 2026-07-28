@@ -43,6 +43,10 @@ public static class DependencyInjection
     static void Identity_Setup(this IServiceCollection services )
     {
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        // ---- Current user (for audit fields - CreatedBy/LastModifiedBy) ----
+        services.AddHttpContextAccessor();
+        services.AddScoped<Naqi.ECommerce.Application.Common.Interfaces.ICurrentUserService,
+            Naqi.ECommerce.Infrastructure.Services.CurrentUserService>();
 
         // ---- Identity core (shared by Api's JWT auth and Dashboard's cookie auth) ----
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

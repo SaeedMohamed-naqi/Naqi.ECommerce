@@ -46,6 +46,15 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         optionsBuilder.UseSqlServer(connectionString,
             sql => sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
 
-        return new ApplicationDbContext(optionsBuilder.Options);
+        // Migrations run outside any HTTP request/DI container, so there's
+        // no real "current user" - this no-op stand-in satisfies the
+        // constructor without pulling in ASP.NET Core's request pipeline.
+        return new ApplicationDbContext(optionsBuilder.Options, new DesignTimeCurrentUserService());
+    }
+
+    private class DesignTimeCurrentUserService : Naqi.ECommerce.Application.Common.Interfaces.ICurrentUserService
+    {
+        public Guid? UserId => null;
+        public string? UserName => null;
     }
 }

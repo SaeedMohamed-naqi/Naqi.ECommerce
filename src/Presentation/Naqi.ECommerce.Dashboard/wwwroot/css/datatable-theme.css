@@ -1,0 +1,685 @@
+﻿/* src/Presentation/Naqi.ECommerce.Dashboard/wwwroot/css/datatable-theme.css
+ *
+ * Generic DataTables theme shared by EVERY list page (Products, Categories,
+ * Orders, Customers, ...) - matches the dashboard's design language
+ * (rounded pill controls, #3553ff accent, Manrope, dark mode) instead of
+ * the default dataTables.bootstrap5 skin.
+ *
+ * Targets `table.dataTable` (the class DataTables assigns automatically)
+ * rather than a specific #id, so this applies to any table on any page
+ * without per-page CSS. Loaded globally in _Layout.cshtml.
+ */
+
+/* ---------------- Shared list-page toolbar ---------------- */
+
+.list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.list-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.list-title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.list-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef1ff;
+    color: var(--naqi-accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+}
+
+.list-search-wrapper {
+    position: relative;
+    min-width: 260px;
+}
+
+    .list-search-wrapper i {
+        position: absolute;
+        top: 50%;
+        inset-inline-start: 14px;
+        transform: translateY(-50%);
+        color: var(--naqi-muted);
+        font-size: 13px;
+    }
+
+.list-search-input {
+    width: 100%;
+    border: 1px solid var(--naqi-border);
+    border-radius: 100px;
+    padding: 8px 16px 8px 36px;
+    font-size: 14px;
+    background: #fff;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+html[dir="rtl"] .list-search-input {
+    padding: 8px 36px 8px 16px;
+}
+
+.list-search-input:focus {
+    outline: none;
+    border-color: var(--naqi-accent);
+    box-shadow: 0 0 0 3px rgba(53, 83, 255, .12);
+}
+
+/* Generic pill action button - used for Sync, Export, Refresh, etc. */
+.btn-pill-primary {
+    border-radius: 100px;
+    background: var(--naqi-accent);
+    border: 1px solid var(--naqi-accent);
+    color: #fff;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity .15s ease;
+}
+
+    .btn-pill-primary:hover {
+        opacity: .9;
+        color: #fff;
+    }
+
+    .btn-pill-primary:disabled {
+        opacity: .6;
+    }
+
+/* ---------------- Table ---------------- */
+
+table.dataTable {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    table.dataTable thead th {
+        border: none;
+        border-bottom: 1px solid var(--naqi-border);
+        color: var(--naqi-muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        padding: 12px 16px;
+        white-space: nowrap;
+    }
+
+    table.dataTable tbody td {
+        border: none;
+        border-bottom: 1px solid #f2f2f2;
+        padding: 14px 16px;
+        vertical-align: middle;
+    }
+
+    table.dataTable tbody tr {
+        transition: background-color .1s ease;
+    }
+
+        table.dataTable tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+
+/* Reusable cell content patterns - primary/secondary line, thumbnail,
+   pill badges, status dots, monospace chips - any list page can reuse
+   these in its column render() callbacks. */
+
+.table-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #f2f4f7;
+}
+/* src/Presentation/Naqi.ECommerce.Dashboard/wwwroot/css/datatable-theme.css
+ *
+ * Generic DataTables theme shared by EVERY list page (Products, Categories,
+ * Orders, Customers, ...) - matches the dashboard's design language
+ * (rounded pill controls, #3553ff accent, Manrope, dark mode) instead of
+ * the default dataTables.bootstrap5 skin.
+ *
+ * Targets `table.dataTable` (the class DataTables assigns automatically)
+ * rather than a specific #id, so this applies to any table on any page
+ * without per-page CSS. Loaded globally in _Layout.cshtml.
+ */
+
+/* ---------------- Shared list-page toolbar ---------------- */
+
+.list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.list-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.list-title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.list-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef1ff;
+    color: var(--naqi-accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+}
+
+.list-search-wrapper {
+    position: relative;
+    min-width: 260px;
+}
+
+.list-search-wrapper i {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 14px;
+    transform: translateY(-50%);
+    color: var(--naqi-muted);
+    font-size: 13px;
+}
+
+.list-search-input {
+    width: 100%;
+    border: 1px solid var(--naqi-border);
+    border-radius: 100px;
+    padding: 8px 16px 8px 36px;
+    font-size: 14px;
+    background: #fff;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+html[dir="rtl"] .list-search-input {
+    padding: 8px 36px 8px 16px;
+}
+
+.list-search-input:focus {
+    outline: none;
+    border-color: var(--naqi-accent);
+    box-shadow: 0 0 0 3px rgba(53, 83, 255, .12);
+}
+
+/* Generic pill action button - used for Sync, Export, Refresh, etc. */
+.btn-pill-primary {
+    border-radius: 100px;
+    background: var(--naqi-accent);
+    border: 1px solid var(--naqi-accent);
+    color: #fff;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity .15s ease;
+}
+
+.btn-pill-primary:hover {
+    opacity: .9;
+    color: #fff;
+}
+
+.btn-pill-primary:disabled {
+    opacity: .6;
+}
+
+/* ---------------- Table ---------------- */
+
+table.dataTable {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table.dataTable thead th {
+    border: none;
+    border-bottom: 1px solid var(--naqi-border);
+    color: var(--naqi-muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 12px 16px;
+    white-space: nowrap;
+}
+
+table.dataTable tbody td {
+    border: none;
+    border-bottom: 1px solid #f2f2f2;
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+table.dataTable tbody tr {
+    transition: background-color .1s ease;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #f8f9ff;
+}
+
+/* Reusable cell content patterns - primary/secondary line, thumbnail,
+   pill badges, status dots, monospace chips - any list page can reuse
+   these in its column render() callbacks. */
+
+.table-thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #f2f4f7;
+}
+
+.table-thumb-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f2f4f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c3c8d1;
+    font-size: 16px;
+}
+
+.table-primary-text {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.table-secondary-text {
+    color: var(--naqi-muted);
+    font-size: 12px;
+}
+
+.pill-badge {
+    display: inline-block;
+    background: #f2f4f7;
+    color: #505553;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+}
+
+.amount-current {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.amount-old {
+    color: var(--naqi-muted);
+    text-decoration: line-through;
+    font-size: 12px;
+    margin-inline-start: 6px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+}
+
+.status-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-badge.status-success {
+    background: #e8f8ee;
+    color: #1a9c53;
+}
+
+.status-badge.status-danger {
+    background: #fdeaea;
+    color: #e04343;
+}
+
+.status-badge.status-warning {
+    background: #fff6e5;
+    color: #b8790a;
+}
+
+.mono-chip {
+    background: #f2f4f7;
+    color: #505553;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+}
+
+/* ---------------- DataTables chrome overrides ---------------- */
+
+.dataTables_wrapper .dataTables_info {
+    color: var(--naqi-muted);
+    font-size: 13px;
+    padding-top: 12px;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 8px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 100px !important;
+    margin-inline-start: 4px;
+     border: 1px solid transparent !important;
+    color: var(--naqi-muted) !important;
+    font-size: 13px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: var(--naqi-accent) !important;
+    border-color: var(--naqi-accent) !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #eef1ff !important;
+    color: var(--naqi-accent) !important;
+    border-color: transparent !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+    color: #d0d3d8 !important;
+    background: transparent !important;
+    cursor: default;
+}
+
+.dataTables_wrapper .dataTables_processing {
+    background: transparent;
+    color: var(--naqi-accent);
+    font-weight: 600;
+}
+
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc:after {
+    opacity: .35;
+}
+
+/* ---------------- Empty state ---------------- */
+
+.table-empty-state {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--naqi-muted);
+}
+
+.table-empty-state i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: .4;
+}
+
+/* ---------------- Dark mode ---------------- */
+
+body.dark-mode .list-search-input {
+    background: #22262c;
+    border-color: #2a2d33;
+    color: #f8f8f8;
+}
+
+body.dark-mode .list-count-badge {
+    background: #1c1f2e;
+}
+
+body.dark-mode table.dataTable thead th {
+    border-color: #2a2d33;
+}
+
+body.dark-mode table.dataTable tbody td {
+    border-color: #22262c;
+}
+
+body.dark-mode table.dataTable tbody tr:hover {
+    background-color: #1c1f24;
+}
+
+body.dark-mode .pill-badge,
+body.dark-mode .mono-chip {
+    background: #22262c;
+    color: #c3c8d1;
+}
+
+body.dark-mode .table-thumb,
+body.dark-mode .table-thumb-placeholder {
+    background: #22262c;
+}
+
+body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #1c1f2e !important;
+}
+.table-thumb-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f2f4f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c3c8d1;
+    font-size: 16px;
+}
+
+.table-primary-text {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.table-secondary-text {
+    color: var(--naqi-muted);
+    font-size: 12px;
+}
+
+.pill-badge {
+    display: inline-block;
+    background: #f2f4f7;
+    color: #505553;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+}
+
+.amount-current {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.amount-old {
+    color: var(--naqi-muted);
+    text-decoration: line-through;
+    font-size: 12px;
+    margin-inline-start: 6px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+}
+
+    .status-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-badge.status-success {
+        background: #e8f8ee;
+        color: #1a9c53;
+    }
+
+    .status-badge.status-danger {
+        background: #fdeaea;
+        color: #e04343;
+    }
+
+    .status-badge.status-warning {
+        background: #fff6e5;
+        color: #b8790a;
+    }
+
+.mono-chip {
+    background: #f2f4f7;
+    color: #505553;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+}
+
+/* ---------------- DataTables chrome overrides ---------------- */
+
+.dataTables_wrapper .dataTables_info {
+    color: var(--naqi-muted);
+    font-size: 13px;
+    padding-top: 12px;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    padding-top: 8px;
+}
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 100px !important;
+        margin-inline-start: 4px;
+         border: 1px solid transparent !important;
+        color: var(--naqi-muted) !important;
+        font-size: 13px;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: var(--naqi-accent) !important;
+            border-color: var(--naqi-accent) !important;
+            color: #fff !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #eef1ff !important;
+            color: var(--naqi-accent) !important;
+            border-color: transparent !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+            color: #d0d3d8 !important;
+            background: transparent !important;
+            cursor: default;
+        }
+
+.dataTables_wrapper .dataTables_processing {
+    background: transparent;
+    color: var(--naqi-accent);
+    font-weight: 600;
+}
+
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc:after {
+    opacity: .35;
+}
+
+/* ---------------- Empty state ---------------- */
+
+.table-empty-state {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--naqi-muted);
+}
+
+    .table-empty-state i {
+        font-size: 32px;
+        margin-bottom: 12px;
+        display: block;
+        opacity: .4;
+    }
+
+/* ---------------- Dark mode ---------------- */
+
+body.dark-mode .list-search-input {
+    background: #22262c;
+    border-color: #2a2d33;
+    color: #f8f8f8;
+}
+
+body.dark-mode .list-count-badge {
+    background: #1c1f2e;
+}
+
+body.dark-mode table.dataTable thead th {
+    border-color: #2a2d33;
+}
+
+body.dark-mode table.dataTable tbody td {
+    border-color: #22262c;
+}
+
+body.dark-mode table.dataTable tbody tr:hover {
+    background-color: #1c1f24;
+}
+
+body.dark-mode .pill-badge,
+body.dark-mode .mono-chip {
+    background: #22262c;
+    color: #c3c8d1;
+}
+
+body.dark-mode .table-thumb,
+body.dark-mode .table-thumb-placeholder {
+    background: #22262c;
+}
+
+body.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #1c1f2e !important;
+}

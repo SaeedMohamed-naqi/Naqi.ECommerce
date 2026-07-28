@@ -4,26 +4,39 @@
     Layout = "_Layout";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
-}
+@* No @section Styles / DataTables CDN links here - those are now global
+   in _Layout.cshtml, along with the shared datatable-theme.css. Only
+   page-specific CSS (if any) would go in a Styles section. *@
 
 @Html.AntiForgeryToken()
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="mb-0">@Localizer["Products"]</h4>
+<div class="list-toolbar">
+    <div class="list-toolbar-left">
+        <h4 class="list-title">@Localizer["Products"]</h4>
+        <span class="list-count-badge">
+            <i class="fa-solid fa-box"></i>
+            <span id="products-count">0</span> @Localizer["Products"]
+        </span>
+    </div>
 
-    <button id="sync-products-btn" type="button" class="btn btn-sm btn-primary d-flex align-items-center gap-2"
-            data-success-title="@Localizer["SyncCompleteTitle"]"
-            data-success-text="@Localizer["SyncCompleteText"]"
-            data-error-title="@Localizer["SyncFailedTitle"]">
-        <i class="fa-solid fa-rotate" id="sync-icon"></i>
-        <span id="sync-label">@Localizer["SyncProducts"]</span>
-    </button>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="list-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="products-search" class="list-search-input" placeholder="@Localizer["Search"]" />
+        </div>
+
+        <button id="sync-products-btn" type="button" class="btn btn-pill-primary d-flex align-items-center gap-2"
+                data-success-title="@Localizer["SyncCompleteTitle"]"
+                data-success-text="@Localizer["SyncCompleteText"]"
+                data-error-title="@Localizer["SyncFailedTitle"]">
+            <i class="fa-solid fa-rotate" id="sync-icon"></i>
+            <span id="sync-label">@Localizer["SyncProducts"]</span>
+        </button>
+    </div>
 </div>
 
 <div class="table-responsive">
-    <table id="products-table" class="table table-hover align-middle w-100">
+    <table id="products-table" class="table w-100">
         <thead>
             <tr>
                 <th></th>
@@ -39,78 +52,74 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+    @* All shared config (dom layout, RTL language file, pagination
+       styling, search debounce, count badge) lives in datatable-common.js
+       now - this page only supplies the url, columns, and page-specific
+       render callbacks. *@
     <script>
         $(function () {
-            $('#products-table').DataTable({
-                serverSide: true,
-                processing: true,
-                ajax: {
-                    url: '@Url.Action("GetData", "Products")',
-                    type: 'POST',
-                    headers: {
-                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            const noImageIcon = '<div class="table-thumb-placeholder"><i class="fa-solid fa-image"></i></div>';
+
+            NaqiDataTable.init('#products-table', {
+                url: '@Url.Action("GetData", "Products")',
+                order: [[6, 'desc']],
+                countBadgeSelector: '#products-count',
+                searchInputSelector: '#products-search',
+                emptyMessage: `<div class="table-empty-state">
+                                  <i class="fa-solid fa-box-open"></i>
+                                  @Localizer["NoProductsYet"]
+                               </div>`,
+                columns: [
+                    {
+                        data: 'imageUrl',
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return data
+                                ? `<img src="${data}" alt="${row.nameEn}" class="table-thumb" />`
+                                : noImageIcon;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (row) {
+                            return `<div class="table-primary-text">${row.nameEn}</div>` +
+                                   `<div class="table-secondary-text">${row.nameAr}</div>`;
+                        }
+                    },
+                    {
+                        data: 'externalProductId',
+                        render: (d) => `<span class="mono-chip">${d}</span>`
+                    },
+                    {
+                        data: 'categoryNameEn',
+                        render: (d) => `<span class="pill-badge">${d}</span>`
+                    },
+                    {
+                        data: null,
+                        render: function (row) {
+                            const price = Number(row.price).toFixed(2);
+                            const old = row.oldPrice
+                                ? `<span class="amount-old">${Number(row.oldPrice).toFixed(2)}</span>`
+                                : '';
+                            return `<span class="amount-current">${price}</span>${old}`;
+                        }
+                    },
+                    {
+                        data: 'stockQuantity',
+                        render: function (data) {
+                            const cls = data > 0 ? 'status-success' : 'status-danger';
+                            return `<span class="status-badge ${cls}">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'lastSyncedAtUtc',
+                        render: function (data) {
+                            return NaqiDateTime.toLocal(data);
+                        }
                     }
-                },
-                order: [[6, 'desc']], // Last Synced column, newest first
-                pageLength: 20,
-                lengthMenu: [10, 20, 50, 100],
-                language: {
-                    // Arabic DataTables translation - only loaded when the
-                    // page is actually in Arabic, matching this Dashboard's
-                    // culture handling.
-                    url: '@(CultureHelper.CurrentCulture == "ar"
-                                            ? "https://cdn.datatables.net/plug-ins/1.13.8/i18n/ar.json"
-                                            : "")'
-            },
-            columns: [
-                {
-                    data: 'imageUrl',
-                    orderable: false,
-                    render: function (data) {
-                        return data
-                            ? `<img src="${data}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;" />`
-                            : '';
-                    }
-                },
-                {
-                    data: null,
-                    render: function (row) {
-                        return `<div class="fw-semibold">${row.nameEn}</div>` +
-                               `<div class="text-muted small">${row.nameAr}</div>`;
-                    }
-                },
-                { data: 'externalProductId', render: (d) => `<code>${d}</code>` },
-                { data: 'categoryNameEn' },
-                {
-                    data: null,
-                    render: function (row) {
-                        const price = Number(row.price).toFixed(2);
-                        const old = row.oldPrice
-                            ? `<span class="text-muted text-decoration-line-through small ms-1">${Number(row.oldPrice).toFixed(2)}</span>`
-                            : '';
-                        return `${price} ${old}`;
-                    }
-                },
-                {
-                    data: 'stockQuantity',
-                    render: function (data) {
-                        const cls = data > 0 ? 'bg-success' : 'bg-danger';
-                        return `<span class="badge ${cls}">${data}</span>`;
-                    }
-                },
-                {
-                    data: 'lastSyncedAtUtc',
-                    render: function (data) {
-                        if (!data) return '-';
-                        const d = new Date(data);
-                        return d.toLocaleString();
-                    }
-                }
-            ]
+                ]
+            });
         });
-    });
-</script>
-<script src="~/js/products-sync.js"></script>
+    </script>
+    <script src="~/js/products-sync.js"></script>
 }
