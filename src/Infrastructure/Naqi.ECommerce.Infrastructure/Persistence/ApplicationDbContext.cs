@@ -19,7 +19,7 @@ public class ApplicationDbContext
         : base(options) { }
 
     public DbSet<Product> Products => Set<Product>();
-    //public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Category> Categories => Set<Category>();
     //public DbSet<Order> Orders => Set<Order>();
     //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     //public DbSet<Customer> Customers => Set<Customer>();

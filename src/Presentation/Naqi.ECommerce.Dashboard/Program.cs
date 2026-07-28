@@ -72,6 +72,15 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+// Handles EVERY unhandled exception from here down the pipeline - see
+// GlobalExceptionMiddleware for the AJAX-vs-full-page distinction.
+// Placed after UseDeveloperExceptionPage so Development still gets the
+// detailed stack-trace page instead of the friendly Error view/JSON.
+//if (!app.Environment.IsDevelopment())
+{
+    app.UseMiddleware<Naqi.ECommerce.Dashboard.Middleware.GlobalExceptionMiddleware>();
+}
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

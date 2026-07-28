@@ -43,5 +43,17 @@
   "CopyrightName": "Naqi",
   "LanguageEnglish": "ENG",
   "LanguageArabic": "العربية",
-  "ToggleSidebar": "Toggle sidebar"
+  "ToggleSidebar": "Toggle sidebar",
+
+  "Search": "Search",
+  "SyncProducts": "Sync Products",
+  "ExternalId": "External ID",
+  "Price": "Price",
+  "Quantity": "Quantity",
+  "LastSynced": "Last Synced",
+  "NoProductsYet": "No products yet - click \"Sync Products\" to import from the middleware.",
+
+  "SyncCompleteTitle": "Sync Complete",
+  "SyncCompleteText": "{fetched} fetched, {created} created, {updated} updated.",
+  "SyncFailedTitle": "Sync Failed"
 }

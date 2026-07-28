@@ -43,5 +43,17 @@
   "CopyrightName": "نقي",
   "LanguageEnglish": "ENG",
   "LanguageArabic": "العربية",
-  "ToggleSidebar": "تبديل القائمة الجانبية"
+  "ToggleSidebar": "تبديل القائمة الجانبية",
+
+  "Search": "بحث",
+  "SyncProducts": "مزامنة المنتجات",
+  "ExternalId": "المعرف الخارجي",
+  "Price": "السعر",
+  "Quantity": "الكمية",
+  "LastSynced": "آخر مزامنة",
+  "NoProductsYet": "لا توجد منتجات بعد - اضغط \"مزامنة المنتجات\" للاستيراد من الميدلوير.",
+
+  "SyncCompleteTitle": "اكتملت المزامنة",
+  "SyncCompleteText": "تم جلب {fetched}، إنشاء {created}، تحديث {updated}.",
+  "SyncFailedTitle": "فشلت المزامنة"
 }

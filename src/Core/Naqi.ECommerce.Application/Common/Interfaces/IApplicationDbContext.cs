@@ -16,7 +16,7 @@ namespace Naqi.ECommerce.Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     DbSet<Product> Products { get; }
-    //DbSet<Category> Categories { get; }
+    DbSet<Category> Categories { get; }
     //DbSet<Order> Orders { get; }
     //DbSet<OrderItem> OrderItems { get; }
     //DbSet<Customer> Customers { get; }

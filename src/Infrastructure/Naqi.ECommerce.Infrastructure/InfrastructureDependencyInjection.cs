@@ -31,26 +31,45 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString,
                 sql => sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
+
+        services.Identity_Setup();
+        services.NaqiMiddleware_Setup(configuration);
+
+        
+        return services;
+    }
+
+
+    static void Identity_Setup(this IServiceCollection services )
+    {
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         // ---- Identity core (shared by Api's JWT auth and Dashboard's cookie auth) ----
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-            {
-                // Password policy - tune to Naqi's security requirements
-                options.Password.RequiredLength = 8;
-                options.Password.RequireDigit = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = false;
+        {
+            // Password policy - tune to Naqi's security requirements
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = false;
 
-                // Lockout policy - protects the SuperAdmin/login endpoint from brute force
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            // Lockout policy - protects the SuperAdmin/login endpoint from brute force
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
 
-                options.User.RequireUniqueEmail = true;
-            })
+            options.User.RequireUniqueEmail = true;
+        })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+    }
+    static void NaqiMiddleware_Setup(this IServiceCollection services, IConfiguration configuration)
+    {
+        var middlewareBaseUrl = configuration["NaqiMiddleware:BaseUrl"]    ?? throw new InvalidOperationException("NaqiMiddleware:BaseUrl is not configured.");
 
-        return services;
+        services.AddHttpClient<Naqi.ECommerce.Application.Common.Interfaces.INaqiMiddlewareClient, Naqi.ECommerce.Infrastructure.ExternalServices.NaqiMiddleware.NaqiMiddlewareClient>(client =>
+        {
+            client.BaseAddress = new Uri(middlewareBaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(60);
+        });
     }
 }
