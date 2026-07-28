@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.18" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.18">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Naqi.ECommerce.Application\Naqi.ECommerce.Application.csproj" />
+		<ProjectReference Include="..\..\Infrastructure\Naqi.ECommerce.Infrastructure\Naqi.ECommerce.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<!--
+    Localization JSON files live under wwwroot/Resources, NOT a project-root
+    Resources folder. Single source of truth stays in
+    Application/Resources/*.json (edit translations there) - this copies
+    them into THIS project's wwwroot/Resources at build time.
+    Program.cs reads from AppContext.BaseDirectory + "wwwroot/Resources"
+    to match, and blocks direct HTTP access to that path since wwwroot
+    is otherwise served publicly by UseStaticFiles().
+  -->
+	<ItemGroup>
+		<None Include="..\..\Core\Naqi.ECommerce.Application\Resources\*.json">
+			<Link>wwwroot\Resources\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+</Project>

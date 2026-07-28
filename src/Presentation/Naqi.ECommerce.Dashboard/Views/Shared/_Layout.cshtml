@@ -1,0 +1,157 @@
+﻿@* src/Presentation/Naqi.ECommerce.Dashboard/Views/Shared/_Layout.cshtml *@
+@using Naqi.ECommerce.Application
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Naqi.ECommerce.Application.Resources.SharedResource> Localizer
+@{
+    var currentCulture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var isRtl = LocalizationDependencyInjection.IsRtl(currentCulture);
+    var dir = isRtl ? "rtl" : "ltr";
+
+    // Helper: highlight the active sidebar item by matching the current controller.
+    string ActiveClass(string controllerName) =>
+        string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), controllerName,
+            StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="@currentCulture" dir="@dir">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Naqi Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/Naqi-Logo.svg" asp-append-version="true" />
+    <link rel="shortcut icon" href="~/images/Naqi-Logo.svg" />
+    <link rel="apple-touch-icon" href="~/images/Naqi-Logo.svg" />
+    @if (isRtl)
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    }
+    else
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/dashboard-layout.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    @* Apply saved theme BEFORE the sidebar/navbar render, to avoid a
+       light->dark flash - this runs synchronously since <body> already
+       exists as soon as the parser reaches this point. Same intent as the
+       React app's useEffect on mount, just adapted for server-rendered HTML. *@
+    <script>
+        (function () {
+            if (localStorage.getItem("theme") === "dark") {
+                document.body.classList.add("dark-mode");
+            }
+        })();
+    </script>
+    <div class="dashboard-shell">
+        <aside class="sidebar" id="sidebar">
+            <script>
+                if (localStorage.getItem("sidebarCollapsed") === "true") {
+                    document.getElementById("sidebar").classList.add("collapsed");
+                }
+            </script>
+            <div class="sidebar-header">
+                <a href="@Url.Action("Index", "Home")" class="sidebar-logo-link">
+                    <img src="~/images/naqi-logo.svg" alt="Naqi" class="sidebar-logo" />
+                </a>
+                <img src="~/images/Collapsed-Naqi-Logo.svg" alt="Naqi" class="sidebar-logo-collapsed" id="sidebar-logo-collapsed" title="@Localizer["ToggleSidebar"]" />
+                <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Toggle sidebar">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <h5 class="sidebar-main-menu-label">@Localizer["Catalog"]</h5>
+
+            <a class="sidebar-item @ActiveClass("Products")" asp-controller="Products" asp-action="Index">
+                <i class="fa-solid fa-box"></i>
+                <span class="sidebar-item-title">@Localizer["Products"]</span>
+            </a>
+            <a class="sidebar-item @ActiveClass("Categories")" asp-controller="Categories" asp-action="Index">
+                <i class="fa-solid fa-layer-group"></i>
+                <span class="sidebar-item-title">@Localizer["Categories"]</span>
+            </a>
+
+            <h5 class="sidebar-main-menu-label">@Localizer["Sales"]</h5>
+
+            <a class="sidebar-item @ActiveClass("Orders")" asp-controller="Orders" asp-action="Index">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="sidebar-item-title">@Localizer["Orders"]</span>
+            </a>
+            <a class="sidebar-item @ActiveClass("Customers")" asp-controller="Customers" asp-action="Index">
+                <i class="fa-solid fa-users"></i>
+                <span class="sidebar-item-title">@Localizer["Customers"]</span>
+            </a>
+
+            @if (User.IsInRole(Naqi.ECommerce.Infrastructure.Identity.Roles.SuperAdmin))
+            {
+                <h5 class="sidebar-main-menu-label">@Localizer["Administration"]</h5>
+                <a class="sidebar-item @ActiveClass("AdminUsers")" asp-controller="AdminUsers" asp-action="Index">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span class="sidebar-item-title">@Localizer["AdminUsers"]</span>
+                </a>
+            }
+        </aside>
+
+        <div class="dashboard-main">
+            <nav class="dashboard-navbar">
+                <div class="navbar-left"></div>
+                <div class="navbar-right">
+                    @* Language switcher - server-side, full reload via CultureController *@
+                    <div class="dropdown">
+                        <button class="navbar-icon-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="@Localizer["Language"]">
+                            <i class="fa-solid fa-globe"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @foreach (var culture in LocalizationDependencyInjection.SupportedCultures)
+                            {
+                                var label = culture == "ar" ? "العربية" : "English";
+                                <li>
+                                    <a class="dropdown-item @(culture == currentCulture ? "active" : "")"
+                                       asp-controller="Culture" asp-action="Set"
+                                       asp-route-culture="@culture"
+                                       asp-route-returnUrl="@Context.Request.Path">
+                                        @label
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <button id="theme-toggle" class="navbar-icon-btn" type="button" title="@Localizer["ToggleTheme"]">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <div class="navbar-user-wrapper dropdown">
+                        <button class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="navbar-user-name">@User.Identity?.Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i>@Localizer["Logout"]
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="dashboard-content">
+                <div class="page-card">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/dashboard-layout.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
