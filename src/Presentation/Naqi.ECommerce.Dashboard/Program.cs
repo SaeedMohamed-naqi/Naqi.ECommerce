@@ -95,6 +95,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}"); // land on login when unauthenticated
+    pattern: "{controller=home}/{action=index}/{id?}"); // land on login when unauthenticated
 
 app.Run();

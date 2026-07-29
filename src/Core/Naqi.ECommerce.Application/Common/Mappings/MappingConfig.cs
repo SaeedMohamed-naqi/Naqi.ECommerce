@@ -28,7 +28,22 @@ public class MappingConfig : IRegister
         //    .Map(dest => dest.Items, src => src.OrderItems);
 
         //config.NewConfig<OrderItem, OrderItemDto>()
-        //    .Map(dest => dest.ProductName, src => src.Product.Name);
+            //.Map(dest => dest.ProductName, src => src.Product.Name);
+
+        // ---- ProductSpecification -> SpecificationDto, ProductCategory -> UiCategoryDto ----
+        // Property names already align 1:1, so Mapster's convention would
+        // likely handle these automatically - registered explicitly anyway
+        // so the collection-of-entity -> collection-of-DTO conversion used
+        // inside Product -> ProductDetailsDto is guaranteed to resolve,
+        // rather than depending on Mapster generating it on the fly.
+        config.NewConfig<Naqi.ECommerce.Domain.Entities.ProductSpecification,
+            Naqi.ECommerce.Application.Features.Products.Queries.SpecificationDto>();
+
+        config.NewConfig<Naqi.ECommerce.Domain.Entities.ProductCategory,
+            Naqi.ECommerce.Application.Features.Products.Queries.UiCategoryDto>();
+
+        config.NewConfig<Naqi.ECommerce.Domain.Entities.ProductInstallation,
+            Naqi.ECommerce.Application.Features.Products.Queries.InstallationDto>();
 
         // ---- Product -> ProductDetailsDto ----
         // Explicit even though Mapster's naming convention would likely
@@ -41,10 +56,7 @@ public class MappingConfig : IRegister
         config.NewConfig<Product, Naqi.ECommerce.Application.Features.Products.Queries.ProductDetailsDto>()
             .Map(dest => dest.CategoryNameEn, src => src.Category.NameEn)
             .Map(dest => dest.CategoryNameAr, src => src.Category.NameAr)
-             .Ignore(dest => dest.AllImageUrls);
-
-        config.NewConfig<Naqi.ECommerce.Domain.Entities.ProductCategory,
-           Naqi.ECommerce.Application.Features.Products.Queries.UiCategoryDto>();
+            .Ignore(dest => dest.AllImageUrls);
 
         //// ---- Command -> Entity (creation mapping) ----
         //// Useful when a Command carries the same shape as the entity

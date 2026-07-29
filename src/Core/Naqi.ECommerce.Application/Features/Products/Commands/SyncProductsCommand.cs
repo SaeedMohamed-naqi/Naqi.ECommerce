@@ -109,6 +109,7 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
                     var existing = await _context.Products
                         .Include(p => p.Specifications)
                         .Include(p => p.UiCategories)
+                        .Include(p => p.Installations)
                         .FirstOrDefaultAsync(p => p.ExternalProductId == item.ProductId, cancellationToken);
 
                     Product product;
@@ -136,6 +137,12 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
                             c.CategoryId, c.NameEn, c.NameAr, c.Slug, c.Image, c.IsPrimary, c.IsLeaf));
 
                     product.SyncUiCategories(uiCategoryData);
+
+                    var installationData = (item.ProductInstallations ?? new List<Application.Common.Interfaces.NaqiMiddleware.MiddlewareProductInstallation>())
+                        .Select(i => new ProductInstallationSyncData(
+                            i.InstallationId, i.TitleEn, i.TitleAr, i.Price, i.IsSelected == 1));
+
+                    product.SyncInstallations(installationData);
                 }
 
                 totalFetched += page.Data.Count;

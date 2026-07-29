@@ -43,6 +43,7 @@ public class MiddlewareProduct
     public List<MiddlewareVariant>? Variants { get; set; }
     public List<MiddlewareUiCategory>? UiCategories { get; set; }
     public List<MiddlewareSpecification>? Specifications { get; set; }
+    public List<MiddlewareProductInstallation>? ProductInstallations { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
     // ---- Tag/subtag (app display) ----
@@ -111,4 +112,14 @@ public class MiddlewareSpecification
     // description, despite the source's "description_name_*" key names.
     public string DescriptionNameEn { get; set; } = string.Empty;
     public string DescriptionNameAr { get; set; } = string.Empty;
+}
+
+public class MiddlewareProductInstallation
+{
+    public long InstallationId { get; set; }
+    public long ProductId { get; set; }
+    public string TitleEn { get; set; } = string.Empty;
+    public string TitleAr { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public int IsSelected { get; set; } // 1/0 in JSON - converted to bool during upsert
 }

@@ -75,6 +75,9 @@ public class Product : BaseAuditableEntity
     private readonly List<ProductCategory> _uiCategories = new();
     public IReadOnlyCollection<ProductCategory> UiCategories => _uiCategories.AsReadOnly();
 
+    private readonly List<ProductInstallation> _installations = new();
+    public IReadOnlyCollection<ProductInstallation> Installations => _installations.AsReadOnly();
+
     private Product() { } // EF Core needs a parameterless constructor
 
     public Product(string nameEn, string nameAr, string sku, decimal price, int stockQuantity, long categoryId)
@@ -234,6 +237,32 @@ public class Product : BaseAuditableEntity
             }
         }
     }
+
+    // Same upsert-and-prune pattern, for the middleware's
+    // product_installations array.
+    public void SyncInstallations(IEnumerable<ProductInstallationSyncData> incoming)
+    {
+        var incomingList = incoming.ToList();
+        var incomingIds = incomingList.Select(i => i.ExternalInstallationId).ToHashSet();
+
+        _installations.RemoveAll(i => !incomingIds.Contains(i.ExternalInstallationId));
+
+        foreach (var instData in incomingList)
+        {
+            var existing = _installations.FirstOrDefault(i => i.ExternalInstallationId == instData.ExternalInstallationId);
+
+            if (existing is not null)
+            {
+                existing.UpdateFromSync(instData.TitleEn, instData.TitleAr, instData.Price, instData.IsSelected);
+            }
+            else
+            {
+                _installations.Add(new ProductInstallation(
+                    Id, instData.ExternalInstallationId,
+                    instData.TitleEn, instData.TitleAr, instData.Price, instData.IsSelected));
+            }
+        }
+    }
 }
 
 // Groups everything CreateFromSync/UpdateFromSync need - avoids an
@@ -283,3 +312,10 @@ public record ProductCategorySyncData(
     string? ImageUrl,
     bool IsPrimary,
     bool IsLeaf);
+
+public record ProductInstallationSyncData(
+    long ExternalInstallationId,
+    string TitleEn,
+    string TitleAr,
+    decimal Price,
+    bool IsSelected);

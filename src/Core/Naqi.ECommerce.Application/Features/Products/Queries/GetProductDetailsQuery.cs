@@ -11,6 +11,7 @@ public record GetProductDetailsQuery(long Id) : IRequest<ProductDetailsDto?>;
 
 public record SpecificationDto(string TitleEn, string TitleAr, string ValueEn, string ValueAr);
 public record UiCategoryDto(string NameEn, string NameAr, string? Slug, string? ImageUrl, bool IsPrimary, bool IsLeaf);
+public record InstallationDto(string TitleEn, string TitleAr, decimal Price, bool IsSelected);
 
 public record ProductDetailsDto(
     long Id,
@@ -32,6 +33,7 @@ public record ProductDetailsDto(
     IReadOnlyList<string> AllImageUrls,
     IReadOnlyList<SpecificationDto> Specifications,
     IReadOnlyList<UiCategoryDto> UiCategories,
+    IReadOnlyList<InstallationDto> Installations,
     string? TagEn,
     string? TagAr,
     string? SubtagEn,
@@ -64,6 +66,7 @@ public class GetProductDetailsQueryHandler : IRequestHandler<GetProductDetailsQu
             .Include(p => p.Category)
             .Include(p => p.Specifications)
             .Include(p => p.UiCategories)
+            .Include(p => p.Installations)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         if (product is null) return null;

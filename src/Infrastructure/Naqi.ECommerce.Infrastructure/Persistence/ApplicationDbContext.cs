@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Naqi.ECommerce.Application.Common.Interfaces;
 using Naqi.ECommerce.Domain.Entities;
 using Naqi.ECommerce.Infrastructure.Identity;
-using Naqi.ECommerce.Infrastructure.Services;
 
 namespace Naqi.ECommerce.Infrastructure.Persistence;
 
@@ -18,17 +17,52 @@ public class ApplicationDbContext
 {
     private readonly Naqi.ECommerce.Application.Common.Interfaces.ICurrentUserService _currentUserService;
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ICurrentUserService currentUserService)
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options,
+        Naqi.ECommerce.Application.Common.Interfaces.ICurrentUserService currentUserService)
         : base(options)
     {
-        _currentUserService=currentUserService;
+        _currentUserService = currentUserService;
     }
-    public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
 
     public DbSet<Product> Products => Set<Product>();
-    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<ProductInstallation> ProductInstallations => Set<ProductInstallation>();
+    public DbSet<Category> Categories => Set<Category>();
+    //public DbSet<Order> Orders => Set<Order>();
+    //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    //public DbSet<Customer> Customers => Set<Customer>();
 
+    // Auto-populates CreatedBy/CreatedAtUtc on insert and
+    // LastModifiedBy/LastModifiedAtUtc on update, for every entity that
+    // inherits BaseAuditableEntity. UserId is null when there's no
+    // authenticated user (background jobs like SyncProductsCommandHandler,
+    // or anything running outside an HTTP request) - CreatedBy/LastModifiedBy
+    // are left null in that case rather than forced to some placeholder value.
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var utcNow = DateTime.UtcNow;
+        var userId = _currentUserService.UserId;
+
+        foreach (var entry in ChangeTracker.Entries<Domain.Common.BaseAuditableEntity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedAtUtc = utcNow;
+                    entry.Entity.CreatedBy = userId;
+                    break;
+
+                case EntityState.Modified:
+                    entry.Entity.LastModifiedAtUtc = utcNow;
+                    entry.Entity.LastModifiedBy = userId;
+                    break;
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -40,6 +74,39 @@ public class ApplicationDbContext
         builder.Ignore<Naqi.ECommerce.Domain.Common.BaseDomainEvent>();
 
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
+        // ---- Product -> ProductSpecification (private-field-backed collection) ----
+        builder.Entity<Product>(entity =>
+        {
+            entity.HasMany(p => p.Specifications)
+                .WithOne()
+                .HasForeignKey(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade); // deleting a Product removes its specs too
+
+            // EF Core 6+ usually auto-detects the _specifications backing
+            // field by naming convention, but being explicit here avoids
+            // any ambiguity since Specifications has no public setter.
+            entity.Metadata.FindNavigation(nameof(Product.Specifications))!
+                .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
+
+            // ---- Product -> ProductCategory (ui_categories, same pattern) ----
+            entity.HasMany(p => p.UiCategories)
+                .WithOne()
+                .HasForeignKey(c => c.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Metadata.FindNavigation(nameof(Product.UiCategories))!
+                .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
+
+            // ---- Product -> ProductInstallation (product_installations, same pattern) ----
+            entity.HasMany(p => p.Installations)
+                .WithOne()
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Metadata.FindNavigation(nameof(Product.Installations))!
+                .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
+        });
 
         // ---- Force every DateTime to be treated as UTC on read ----
         // SQL Server's datetime2 has no concept of DateTimeKind - EF Core
@@ -84,29 +151,4 @@ public class ApplicationDbContext
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>().ToTable("UserTokens");
     }
-
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var utcNow = DateTime.UtcNow;
-        var userId = _currentUserService.UserId;
-
-        foreach (var entry in ChangeTracker.Entries<Domain.Common.BaseAuditableEntity>())
-        {
-            switch (entry.State)
-            {
-                case EntityState.Added:
-                    entry.Entity.CreatedAtUtc = utcNow;
-                    entry.Entity.CreatedBy = userId;
-                    break;
-
-                case EntityState.Modified:
-                    entry.Entity.LastModifiedAtUtc = utcNow;
-                    entry.Entity.LastModifiedBy = userId;
-                    break;
-            }
-        }
-
-        return await base.SaveChangesAsync(cancellationToken);
-    }
-     
 }
