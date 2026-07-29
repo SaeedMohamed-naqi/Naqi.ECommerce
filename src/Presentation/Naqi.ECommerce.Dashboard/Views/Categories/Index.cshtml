@@ -1,0 +1,110 @@
+﻿@* src/Presentation/Naqi.ECommerce.Dashboard/Views/Categories/Index.cshtml *@
+@{
+    ViewData["Title"] = Localizer["Categories"];
+    Layout = "_Layout";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="list-toolbar">
+    <div class="list-toolbar-left">
+        <h4 class="list-title">@Localizer["Categories"]</h4>
+        <span class="list-count-badge">
+            <i class="fa-solid fa-layer-group"></i>
+            <span id="categories-count">0</span> @Localizer["Categories"]
+        </span>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="list-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="categories-search" class="list-search-input" placeholder="@Localizer["Search"]" />
+        </div>
+
+        <button id="sync-categories-btn" type="button" class="btn btn-pill-primary d-flex align-items-center gap-2"
+                data-success-title="@Localizer["SyncCompleteTitle"]"
+                data-success-text="@Localizer["SyncCompleteText"]"
+                data-error-title="@Localizer["SyncFailedTitle"]">
+            <i class="fa-solid fa-rotate" id="sync-categories-icon"></i>
+            <span id="sync-categories-label">@Localizer["SyncCategories"]</span>
+        </button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table id="categories-table" class="table w-100">
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Localizer["Categories"]</th>
+                <th>@Localizer["ExternalId"]</th>
+                <th>@Localizer["Parent"]</th>
+                <th>@Localizer["Active"]</th>
+                <th>@Localizer["Featured"]</th>
+                <th>@Localizer["DisplayOrder"]</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            const noImageIcon = '<div class="table-thumb-placeholder"><i class="fa-solid fa-layer-group"></i></div>';
+
+            NaqiDataTable.init('#categories-table', {
+                url: '@Url.Action("GetData", "Categories")',
+                order: [[6, 'asc']],
+                countBadgeSelector: '#categories-count',
+                searchInputSelector: '#categories-search',
+                rowClickUrl: (row) => '@Url.Action("Details", "Categories")' + '/' + row.id,
+                emptyMessage: `<div class="table-empty-state">
+                                  <i class="fa-solid fa-layer-group"></i>
+                                  @Localizer["NoCategoriesYet"]
+                               </div>`,
+                columns: [
+                    {
+                        data: 'imageUrl',
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return data
+                                ? `<img src="${data}" alt="${row.nameEn}" class="table-thumb" />`
+                                : noImageIcon;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (row) {
+                            return `<div class="table-primary-text">${row.nameEn}</div>` +
+                                   `<div class="table-secondary-text">${row.nameAr}</div>`;
+                        }
+                    },
+                    {
+                        data: 'externalCategoryId',
+                        render: (d) => d ? `<span class="mono-chip">${d}</span>` : '-'
+                    },
+                    {
+                        data: 'parentNameEn',
+                        render: (d) => d || '-'
+                    },
+                    {
+                        data: 'isActive',
+                        render: function (data) {
+                            const cls = data ? 'status-success' : 'status-danger';
+                            const label = data ? '@Localizer["Yes"]' : '@Localizer["No"]';
+                            return `<span class="status-badge ${cls}">${label}</span>`;
+                        }
+                    },
+                    {
+                        data: 'isFeatured',
+                        render: function (data) {
+                            return data ? '<i class="fa-solid fa-star text-warning"></i>' : '';
+                        }
+                    },
+                    { data: 'displayOrder' }
+                ]
+            });
+        });
+    </script>
+    <script src="~/js/categories-sync.js"></script>
+}

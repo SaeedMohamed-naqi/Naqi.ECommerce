@@ -9,25 +9,20 @@
 
 using Microsoft.EntityFrameworkCore;
 using Naqi.ECommerce.Domain.Entities;
-using System.Collections.Generic;
 
 namespace Naqi.ECommerce.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
-    DbSet<OfferGroup> OfferGroups { get; }
-    DbSet<ProductOffer> ProductOffers { get; }
     DbSet<Product> Products { get; }
-    DbSet<Category> Categories { get; }
     DbSet<ProductSpecification> ProductSpecifications { get; }
     DbSet<ProductCategory> ProductCategories { get; }
-    DbSet<ProductVariant> ProductVariants { get; }
-
     DbSet<ProductInstallation> ProductInstallations { get; }
-
-    //DbSet<Order> Orders { get; }
-    //DbSet<OrderItem> OrderItems { get; }
-    //DbSet<Customer> Customers { get; }
-
+    DbSet<ProductVariant> ProductVariants { get; }
+    DbSet<OfferGroup> OfferGroups { get; }
+    DbSet<ProductOffer> ProductOffers { get; }
+    DbSet<Category> Categories { get; }
+    DbSet<CategoryBanner> CategoryBanners { get; }
+     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

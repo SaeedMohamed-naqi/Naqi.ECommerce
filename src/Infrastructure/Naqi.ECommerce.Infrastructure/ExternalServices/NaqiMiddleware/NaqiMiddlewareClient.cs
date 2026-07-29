@@ -56,4 +56,23 @@ public class NaqiMiddlewareClient : INaqiMiddlewareClient
 
         return result ?? new MiddlewareProductsResponse { Status = false, Data = new() };
     }
+
+    public async Task<MiddlewareCategoryTreeResponse> GetCategoryTreeAsync(CancellationToken cancellationToken = default)
+    {
+        var token = $"{DateTime.Now:d@M@yyyy@H@m@s}@{_apiToken}";
+        _httpClient.DefaultRequestHeaders.Remove("key");
+        _httpClient.DefaultRequestHeaders.Add("key", token);
+
+        // Legacy code POSTs an empty body here (no skip/count) - the tree
+        // endpoint returns everything in one call, unlike products' paging.
+        using var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+        using var response = await _httpClient.PostAsync("api/v2/categories/tree", content, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<MiddlewareCategoryTreeResponse>(
+            _jsonOptions, cancellationToken);
+
+        return result ?? new MiddlewareCategoryTreeResponse { Status = false, Data = new() };
+    }
 }

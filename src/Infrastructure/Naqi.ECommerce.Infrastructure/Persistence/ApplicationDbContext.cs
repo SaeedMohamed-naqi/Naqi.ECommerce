@@ -33,7 +33,8 @@ public class ApplicationDbContext
     public DbSet<OfferGroup> OfferGroups => Set<OfferGroup>();
     public DbSet<ProductOffer> ProductOffers => Set<ProductOffer>();
     public DbSet<Category> Categories => Set<Category>();
- 
+    public DbSet<CategoryBanner> CategoryBanners => Set<CategoryBanner>();
+    
 
     // Auto-populates CreatedBy/CreatedAtUtc on insert and
     // LastModifiedBy/LastModifiedAtUtc on update, for every entity that
@@ -134,6 +135,27 @@ public class ApplicationDbContext
                 .WithMany()
                 .HasForeignKey(o => o.OfferGroupId)
                 .OnDelete(DeleteBehavior.Restrict); // never cascade-delete shared OfferGroup rows via a product offer
+        });
+
+        // ---- Category self-referencing hierarchy + banners ----
+        builder.Entity<Category>(entity =>
+        {
+            // Self-referencing FK MUST use Restrict (or NoAction) - SQL
+            // Server rejects a cascade path that could delete a row
+            // through more than one route, and Category -> Category is
+            // exactly that kind of cycle if left as Cascade.
+            entity.HasOne(c => c.Parent)
+                .WithMany()
+                .HasForeignKey(c => c.ParentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(c => c.Banners)
+                .WithOne()
+                .HasForeignKey(b => b.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade); // deleting a Category removes its own banners
+
+            entity.Metadata.FindNavigation(nameof(Category.Banners))!
+                .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
         });
 
         // ---- Force every DateTime to be treated as UTC on read ----

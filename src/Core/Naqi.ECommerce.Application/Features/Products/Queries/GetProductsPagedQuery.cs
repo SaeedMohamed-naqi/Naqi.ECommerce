@@ -9,7 +9,13 @@ using Naqi.ECommerce.Application.Common.Interfaces;
 namespace Naqi.ECommerce.Application.Features.Products.Queries;
 
 public record GetProductsPagedQuery(int Page = 1, int PageSize = 20, string? Search = null)
-    : IRequest<PagedProductsResult>;
+    : IRequest<PagedProductsResult>
+{
+    // Lets a controller call `new GetProductsPagedQuery(dataTablesRequest)`
+    // directly instead of unpacking Page/Length/SearchValue by hand.
+    public GetProductsPagedQuery(Naqi.ECommerce.Application.Common.Models.DataTablesRequest request)
+        : this(request.Page, request.Length, request.SearchValue) { }
+}
 
 public record ProductListItemDto(
     long Id,

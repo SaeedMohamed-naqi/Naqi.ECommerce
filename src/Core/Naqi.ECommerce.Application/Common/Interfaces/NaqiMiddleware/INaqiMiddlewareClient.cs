@@ -10,4 +10,10 @@ public interface INaqiMiddlewareClient
     /// Fetches one page of products from the middleware.
     /// </summary>
     Task<MiddlewareProductsResponse> GetProductsPageAsync(int skip, int count, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Fetches the entire category tree in one call (no pagination -
+    /// matches the legacy GetCategories() action's behavior).
+    /// </summary>
+    Task<MiddlewareCategoryTreeResponse> GetCategoryTreeAsync(CancellationToken cancellationToken = default);
 }

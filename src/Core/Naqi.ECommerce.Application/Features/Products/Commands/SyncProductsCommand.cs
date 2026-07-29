@@ -193,19 +193,21 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         {
             // Fallback "Uncategorized" bucket - keeps sync from failing
             // outright if a product has no category info in this payload.
+            // Found by Slug (not ExternalCategoryId, which is null here -
+            // this bucket has no real middleware category behind it).
             var uncategorized = await _context.Categories
-                .FirstOrDefaultAsync(c => c.ExternalCategoryId == "uncategorized", cancellationToken);
+                .FirstOrDefaultAsync(c => c.Slug == "uncategorized", cancellationToken);
 
             if (uncategorized is not null)
                 return uncategorized.Id;
 
-            var newUncategorized = new Category("Uncategorized", "غير مصنف", "uncategorized");
+            var newUncategorized = new Category("Uncategorized", "غير مصنف", externalCategoryId: null, imageUrl: null, slug: "uncategorized");
             _context.Categories.Add(newUncategorized);
             await _context.SaveChangesAsync(cancellationToken);
             return newUncategorized.Id;
         }
 
-        var externalCategoryId = primaryCategory.CategoryId.ToString();
+        var externalCategoryId = primaryCategory.CategoryId;
         var existingCategory = await _context.Categories
             .FirstOrDefaultAsync(c => c.ExternalCategoryId == externalCategoryId, cancellationToken);
 

@@ -3,8 +3,7 @@
 // This is the Mapster equivalent of an AutoMapper Profile.
 // Register all entity -> DTO (and DTO -> entity, where needed) rules here.
 
-using Mapster;
- 
+using Mapster; 
 using Naqi.ECommerce.Application.Features.Products.Queries;
 using Naqi.ECommerce.Domain.Entities;
 
@@ -14,7 +13,7 @@ public class MappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-     
+       
 
         // ---- ProductSpecification -> SpecificationDto, ProductCategory -> UiCategoryDto ----
         // Property names already align 1:1, so Mapster's convention would
@@ -60,6 +59,21 @@ public class MappingConfig : IRegister
             .Map(dest => dest.CategoryNameEn, src => src.Category.NameEn)
             .Map(dest => dest.CategoryNameAr, src => src.Category.NameAr)
             .Ignore(dest => dest.AllImageUrls);
- 
+
+        // ---- Category -> CategoryDetailsDto ----
+        // Flattens the Parent navigation (may be null for root categories)
+        // into ParentNameEn/ParentNameAr. Subcategories and ProductCount
+        // are populated separately by the query handler (they need extra
+        // queries this entity's own data can't answer) - Ignore here to
+        // be explicit that Mapster isn't expected to fill them.
+        config.NewConfig<Category, Naqi.ECommerce.Application.Features.Categories.Queries.CategoryDetailsDto>()
+            .Map(dest => dest.ParentNameEn, src => src.Parent != null ? src.Parent.NameEn : null)
+            .Map(dest => dest.ParentNameAr, src => src.Parent != null ? src.Parent.NameAr : null)
+            .Ignore(dest => dest.Subcategories)
+            .Ignore(dest => dest.ProductCount);
+
+        config.NewConfig<CategoryBanner, Naqi.ECommerce.Application.Features.Categories.Queries.CategoryBannerDto>();
+
+      
     }
 }

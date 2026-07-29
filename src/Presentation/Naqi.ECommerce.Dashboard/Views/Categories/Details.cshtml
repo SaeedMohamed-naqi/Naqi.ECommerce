@@ -1,0 +1,331 @@
+﻿@* src/Presentation/Naqi.ECommerce.Dashboard/Views/Categories/Details.cshtml *@
+@using Naqi.ECommerce.Application.Features.Categories.Queries
+@model CategoryDetailsDto
+@{
+    ViewData["Title"] = Model.NameEn;
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <style>
+        .product-details-tab-content {
+            background: #ffffff;
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+        }
+
+        body.dark-mode .product-details-tab-content {
+            background: #1c1f24;
+        }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-3">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-circle" style="width:36px;height:36px;" title="@Localizer["Back"]">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="mb-0">@Model.NameEn</h4>
+            <div class="table-secondary-text">@Model.NameAr</div>
+        </div>
+    </div>
+    @if (Model.ExternalCategoryId.HasValue)
+    {
+        <span class="mono-chip">@Model.ExternalCategoryId</span>
+    }
+</div>
+
+<div class="row g-4">
+    @* ---------------- Left: image + quick facts ---------------- *@
+    <div class="col-lg-4">
+        <div class="border rounded-4 p-3 mb-3" style="border-color: var(--naqi-border) !important;">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.NameEn" class="w-100 rounded-3" />
+            }
+            else
+            {
+                <div class="w-100 rounded-3 d-flex align-items-center justify-content-center table-thumb-placeholder" style="height:180px;">
+                    <i class="fa-solid fa-layer-group fa-2x"></i>
+                </div>
+            }
+
+            <div class="mt-3 d-flex flex-column gap-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="table-secondary-text">@Localizer["Active"]</span>
+                    <span class="status-badge @(Model.IsActive ? "status-success" : "status-danger")">
+                        @(Model.IsActive? Localizer["Yes"] : Localizer["No"])
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="table-secondary-text">@Localizer["Featured"]</span>
+                    @if (Model.IsFeatured)
+                    {
+                        <i class="fa-solid fa-star text-warning"></i>
+                    }
+                    else
+                    {
+                        <span class="table-secondary-text">-</span>
+                    }
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="table-secondary-text">@Localizer["Products"]</span>
+                    <span class="pill-badge">@Model.ProductCount</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ParentNameEn))
+                {
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="table-secondary-text">@Localizer["Parent"]</span>
+                        <span class="pill-badge">@Model.ParentNameEn</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ---------------- Right: tabbed detail sections ---------------- *@
+    <div class="col-lg-8">
+        <div class="border rounded-4" style="border-color: var(--naqi-border) !important;">
+            <ul class="nav nav-tabs px-3 pt-2" id="categoryDetailsTabs" role="tablist" style="border-bottom-color: var(--naqi-border);">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-general" type="button">@Localizer["General"]</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-display" type="button">@Localizer["DisplaySettings"]</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-seo" type="button">@Localizer["Seo"]</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-banners" type="button">@Localizer["Banners"] (@Model.Banners.Count)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-subcategories" type="button">@Localizer["Subcategories"] (@Model.Subcategories.Count)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sync" type="button">@Localizer["SyncInfo"]</button>
+                </li>
+            </ul>
+
+            <div class="tab-content product-details-tab-content p-4">
+                @* ---- General ---- *@
+                <div class="tab-pane fade show active" id="tab-general" role="tabpanel">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["Categories"] (EN)</dt>
+                        <dd class="col-sm-8">@Model.NameEn</dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["Categories"] (AR)</dt>
+                        <dd class="col-sm-8">@Model.NameAr</dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["Slug"]</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.Slug))
+                            {
+                                <span class="mono-chip">@Model.Slug</span>
+                            }
+                            else
+                            {
+                                <span class="table-secondary-text">-</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["Parent"]</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.ParentNameEn))
+                            {
+                                <span>@Model.ParentNameEn <span class="table-secondary-text">(@Model.ParentNameAr)</span></span>
+                            }
+                            else
+                            {
+                                <span class="table-secondary-text">@Localizer["RootLevel"]</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["DisplayOrder"]</dt>
+                        <dd class="col-sm-8">@Model.DisplayOrder</dd>
+
+                        @if (Model.EndsAtUtc.HasValue)
+                        {
+                            <dt class="col-sm-4 table-secondary-text">@Localizer["EndsAt"]</dt>
+                            <dd class="col-sm-8" id="detail-ends-at" data-utc="@Model.EndsAtUtc?.ToString("O")">-</dd>
+                        }
+                    </dl>
+
+                    @if (!string.IsNullOrEmpty(Model.DescriptionEn))
+                    {
+                        <hr />
+                        <h6 class="table-secondary-text text-uppercase" style="font-size:12px;">@Localizer["DescriptionEn"]</h6>
+                        <p style="white-space:pre-line;">@Model.DescriptionEn</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.DescriptionAr))
+                    {
+                        <h6 class="table-secondary-text text-uppercase" style="font-size:12px;">@Localizer["DescriptionAr"]</h6>
+                        <p style="white-space:pre-line;" dir="rtl">@Model.DescriptionAr</p>
+                    }
+                </div>
+
+                @* ---- Display settings ---- *@
+                <div class="tab-pane fade" id="tab-display" role="tabpanel">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["VisibilityChannel"]</dt>
+                        <dd class="col-sm-8">
+                            <span class="pill-badge">
+                                @(Model.VisibilityChannel switch
+                                {
+                                    "both" => Localizer["WebsiteAndApp"],
+                                    "website" => Localizer["WebsiteOnly"],
+                                    "app" => Localizer["AppOnly"],
+                                    _ => Model.VisibilityChannel ?? "-"
+                                })
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["IncludeSubcategoryProducts"]</dt>
+                        <dd class="col-sm-8">
+                            <span class="status-badge @(Model.DisplayDescendantProducts ? "status-success" : "status-warning")">
+                                @(Model.DisplayDescendantProducts? Localizer["Yes"] : Localizer["No"])
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["ShowSubcategories"]</dt>
+                        <dd class="col-sm-8">
+                            <span class="status-badge @(Model.ShowChildCategories ? "status-success" : "status-warning")">
+                                @(Model.ShowChildCategories? Localizer["Yes"] : Localizer["No"])
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+
+                @* ---- SEO ---- *@
+                <div class="tab-pane fade" id="tab-seo" role="tabpanel">
+                    @if (string.IsNullOrEmpty(Model.MetaTitle) && string.IsNullOrEmpty(Model.MetaDescription)
+                                        && string.IsNullOrEmpty(Model.MetaKeywords) && string.IsNullOrEmpty(Model.CanonicalUrl))
+                    {
+                        <div class="table-empty-state">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            @Localizer["NoSeoDataSynced"]
+                        </div>
+                    }
+                    else
+                    {
+                        <dl class="row mb-0">
+                            @if (!string.IsNullOrEmpty(Model.MetaTitle))
+                            {
+                                <dt class="col-sm-4 table-secondary-text">@Localizer["MetaTitle"]</dt>
+                                <dd class="col-sm-8">@Model.MetaTitle</dd>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.MetaDescription))
+                            {
+                                <dt class="col-sm-4 table-secondary-text">@Localizer["MetaDescription"]</dt>
+                                <dd class="col-sm-8">@Model.MetaDescription</dd>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.MetaKeywords))
+                            {
+                                <dt class="col-sm-4 table-secondary-text">@Localizer["MetaKeywords"]</dt>
+                                <dd class="col-sm-8">@Model.MetaKeywords</dd>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.CanonicalUrl))
+                            {
+                                <dt class="col-sm-4 table-secondary-text">@Localizer["CanonicalUrl"]</dt>
+                                <dd class="col-sm-8"><a href="@Model.CanonicalUrl" target="_blank" rel="noopener">@Model.CanonicalUrl</a></dd>
+                            }
+                        </dl>
+                    }
+                </div>
+
+                @* ---- Banners ---- *@
+                <div class="tab-pane fade" id="tab-banners" role="tabpanel">
+                    @if (Model.Banners.Count == 0)
+                    {
+                        <div class="table-empty-state">
+                            <i class="fa-solid fa-image"></i>
+                            @Localizer["NoBannersSynced"]
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (var banner in Model.Banners)
+                            {
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 overflow-hidden" style="border-color: var(--naqi-border) !important;">
+                                        @if (!string.IsNullOrEmpty(banner.ImageUrl))
+                                        {
+                                            <img src="@banner.ImageUrl" alt="@banner.Title" class="w-100" style="max-height:140px;object-fit:cover;" />
+                                        }
+                                        <div class="p-2">
+                                            @if (!string.IsNullOrEmpty(banner.Title))
+                                            {
+                                                <div class="table-primary-text">@banner.Title</div>
+                                            }
+                                            @if (!string.IsNullOrEmpty(banner.Subtitle))
+                                            {
+                                                <div class="table-secondary-text">@banner.Subtitle</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* ---- Subcategories ---- *@
+                <div class="tab-pane fade" id="tab-subcategories" role="tabpanel">
+                    @if (Model.Subcategories.Count == 0)
+                    {
+                        <div class="table-empty-state">
+                            <i class="fa-solid fa-sitemap"></i>
+                            @Localizer["NoSubcategories"]
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-2">
+                            @foreach (var sub in Model.Subcategories)
+                            {
+                                <a asp-action="Details" asp-route-id="@sub.Id" class="d-flex justify-content-between align-items-center p-2 rounded-3 text-decoration-none" style="background:#f8f9fa;">
+                                    <div>
+                                        <div class="table-primary-text">@sub.NameEn</div>
+                                        <div class="table-secondary-text">@sub.NameAr</div>
+                                    </div>
+                                    <span class="status-badge @(sub.IsActive ? "status-success" : "status-danger")">
+                                        @(sub.IsActive? Localizer["Yes"] : Localizer["No"])
+                                    </span>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* ---- Sync / audit info ---- *@
+                <div class="tab-pane fade" id="tab-sync" role="tabpanel">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["Created"]</dt>
+                        <dd class="col-sm-8" id="detail-created-at" data-utc="@Model.CreatedAtUtc.ToString("O")">-</dd>
+
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["LastModified"]</dt>
+                        <dd class="col-sm-8" id="detail-modified-at" data-utc="@Model.LastModifiedAtUtc?.ToString("O")">-</dd>
+                    </dl>
+
+                    <div class="alert alert-light border mt-3 mb-0" style="border-color: var(--naqi-border) !important;">
+                        <i class="fa-solid fa-circle-info me-1 text-muted"></i>
+                        <span class="table-secondary-text">@Localizer["SyncInfoNote"]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            document.querySelectorAll('[data-utc]').forEach(function (el) {
+                const utcValue = el.getAttribute('data-utc');
+                el.textContent = utcValue ? NaqiDateTime.toLocal(utcValue) : '-';
+            });
+        });
+    </script>
+}
