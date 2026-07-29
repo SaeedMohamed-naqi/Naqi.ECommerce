@@ -82,5 +82,20 @@
   "Guidelines": "الإرشادات",
   "OtherSpecifications": "مواصفات أخرى",
   "NoMediaSynced": "لا توجد وسائط تمت مزامنتها لهذا المنتج.",
-  "NoWebsiteContentSynced": "لا توجد بيانات موقع تمت مزامنتها لهذا المنتج."
+  "NoWebsiteContentSynced": "لا توجد بيانات موقع تمت مزامنتها لهذا المنتج.",
+
+  "Specifications": "المواصفات",
+  "Label": "التسمية",
+  "Value": "القيمة",
+  "NoSpecificationsSynced": "لا توجد مواصفات تمت مزامنتها لهذا المنتج.",
+  "WebsiteCategories": "فئات الموقع",
+  "Installations": "خيارات التركيب",
+  "Selected": "محدد",
+  "Variants": "المتغيرات",
+  "Color": "اللون",
+  "NoVariantsSynced": "لا توجد متغيرات تمت مزامنتها لهذا المنتج.",
+
+  "Created": "تاريخ الإنشاء",
+  "LastModified": "آخر تعديل",
+  "SyncInfoNote": "هذا عرض للقراءة فقط لكل ما تمت مزامنته حالياً من الميدلوير لهذا المنتج."
 }

@@ -39,7 +39,7 @@
         <div class="border rounded-4 p-3 mb-3" style="border-color: var(--naqi-border) !important;">
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
-                <img src="@Model.ImageUrl" alt="@Model.NameEn" class="w-100 rounded-3" style="height:220px;object-fit:cover;" />
+                <img src="@Model.ImageUrl" alt="@Model.NameEn" class="w-100 rounded-3"   />
             }
             else
             {
@@ -395,18 +395,17 @@
                         <dt class="col-sm-4 table-secondary-text">@Localizer["LastSynced"]</dt>
                         <dd class="col-sm-8" id="detail-last-synced" data-utc="@Model.LastSyncedAtUtc?.ToString("O")">-</dd>
 
-                        <dt class="col-sm-4 table-secondary-text">Created</dt>
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["Created"]</dt>
                         <dd class="col-sm-8" id="detail-created-at" data-utc="@Model.CreatedAtUtc.ToString("O")">-</dd>
 
-                        <dt class="col-sm-4 table-secondary-text">Last Modified</dt>
+                        <dt class="col-sm-4 table-secondary-text">@Localizer["LastModified"]</dt>
                         <dd class="col-sm-8" id="detail-modified-at" data-utc="@Model.LastModifiedAtUtc?.ToString("O")">-</dd>
                     </dl>
 
                     <div class="alert alert-light border mt-3 mb-0" style="border-color: var(--naqi-border) !important;">
                         <i class="fa-solid fa-circle-info me-1 text-muted"></i>
                         <span class="table-secondary-text">
-                            Variants, specifications, installations, and additional media aren't modeled in the
-                            catalog yet - this view shows everything currently synced from the middleware.
+                            @Localizer["SyncInfoNote"]
                         </span>
                     </div>
                 </div>

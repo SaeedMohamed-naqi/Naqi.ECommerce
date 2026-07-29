@@ -82,5 +82,20 @@
   "Guidelines": "Guidelines",
   "OtherSpecifications": "Other Specifications",
   "NoMediaSynced": "No media synced for this product.",
-  "NoWebsiteContentSynced": "No website content synced for this product."
+  "NoWebsiteContentSynced": "No website content synced for this product.",
+
+  "Specifications": "Specifications",
+  "Label": "Label",
+  "Value": "Value",
+  "NoSpecificationsSynced": "No specifications synced for this product.",
+  "WebsiteCategories": "Website Categories",
+  "Installations": "Installations",
+  "Selected": "Selected",
+  "Variants": "Variants",
+  "Color": "Color",
+  "NoVariantsSynced": "No variants synced for this product.",
+
+  "Created": "Created",
+  "LastModified": "Last Modified",
+  "SyncInfoNote": "This is a read-only view of everything currently synced from the middleware for this product."
 }
