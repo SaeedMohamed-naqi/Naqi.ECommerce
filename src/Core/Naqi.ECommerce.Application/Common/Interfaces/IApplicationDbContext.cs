@@ -17,6 +17,10 @@ public interface IApplicationDbContext
 {
     DbSet<Product> Products { get; }
     DbSet<Category> Categories { get; }
+    DbSet<ProductSpecification> ProductSpecifications { get; }
+    DbSet<ProductCategory> ProductCategories { get; }
+
+
     //DbSet<Order> Orders { get; }
     //DbSet<OrderItem> OrderItems { get; }
     //DbSet<Customer> Customers { get; }

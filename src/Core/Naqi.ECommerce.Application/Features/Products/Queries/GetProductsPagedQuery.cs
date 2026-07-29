@@ -46,7 +46,8 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
         {
             query = query.Where(p =>
                 p.NameEn.Contains(request.Search) ||
-                p.NameAr.Contains(request.Search)  );
+                p.NameAr.Contains(request.Search) ||
+                p.ExternalProductId.ToString().Contains(request.Search));
         }
 
         var projected = query

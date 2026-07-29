@@ -55,5 +55,32 @@
 
   "SyncCompleteTitle": "Sync Complete",
   "SyncCompleteText": "{fetched} fetched, {created} created, {updated} updated.",
-  "SyncFailedTitle": "Sync Failed"
+  "SyncFailedTitle": "Sync Failed",
+
+  "ErrorTitle": "Something went wrong",
+  "ErrorMessage": "An unexpected error occurred. Our team has been notified.",
+  "RequestId": "Request ID",
+  "BackToDashboard": "Back to Dashboard",
+
+  "Back": "Back",
+  "General": "General",
+  "SyncInfo": "Sync Info",
+  "Media": "Media",
+  "WebsiteData": "Website Data",
+
+  "TitleEn": "Title (EN)",
+  "TitleAr": "Title (AR)",
+  "DescriptionEn": "Description (EN)",
+  "DescriptionAr": "Description (AR)",
+  "Sku": "SKU",
+  "Vertical": "Vertical",
+  "Yes": "Yes",
+  "No": "No",
+  "Primary": "Primary",
+  "Warranty": "Warranty",
+  "Accessories": "Accessories",
+  "Guidelines": "Guidelines",
+  "OtherSpecifications": "Other Specifications",
+  "NoMediaSynced": "No media synced for this product.",
+  "NoWebsiteContentSynced": "No website content synced for this product."
 }

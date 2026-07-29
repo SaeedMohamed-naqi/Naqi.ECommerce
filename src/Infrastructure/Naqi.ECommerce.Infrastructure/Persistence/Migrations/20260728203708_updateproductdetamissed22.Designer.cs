@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Naqi.ECommerce.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Naqi.ECommerce.Infrastructure.Persistence;
 namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260728203708_updateproductdetamissed22")]
+    partial class updateproductdetamissed22
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,47 +293,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductCategory", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ExternalCategoryId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsLeaf")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("NameAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NameEn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductCategories");
-                });
-
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductSpecification", b =>
                 {
                     b.Property<long>("Id")
@@ -534,15 +496,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductCategory", b =>
-                {
-                    b.HasOne("Naqi.ECommerce.Domain.Entities.Product", null)
-                        .WithMany("UiCategories")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductSpecification", b =>
                 {
                     b.HasOne("Naqi.ECommerce.Domain.Entities.Product", null)
@@ -560,8 +513,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.Product", b =>
                 {
                     b.Navigation("Specifications");
-
-                    b.Navigation("UiCategories");
                 });
 #pragma warning restore 612, 618
         }

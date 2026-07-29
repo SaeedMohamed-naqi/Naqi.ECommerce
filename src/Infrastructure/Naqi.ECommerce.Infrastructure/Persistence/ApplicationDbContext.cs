@@ -23,12 +23,13 @@ public class ApplicationDbContext
     {
         _currentUserService=currentUserService;
     }
+    public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
-    //public DbSet<Order> Orders => Set<Order>();
-    //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-    //public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder); // MUST come first - configures Identity tables
@@ -107,25 +108,5 @@ public class ApplicationDbContext
 
         return await base.SaveChangesAsync(cancellationToken);
     }
-
-    //protected override void OnModelCreating(ModelBuilder builder)
-    //{
-    //    base.OnModelCreating(builder); // MUST come first - configures Identity tables
-
-    //    // BaseEntity.DomainEvents is a runtime-only collection (raised events
-    //    // waiting to be dispatched after SaveChanges) - it is NOT persisted
-    //    // data, so EF Core must not try to map BaseDomainEvent as an entity.
-    //    builder.Ignore<Naqi.ECommerce.Domain.Common.BaseDomainEvent>();
-
-    //    builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-
-    //    // Rename default AspNetXxx Identity tables to something tidier (optional)
-    //    builder.Entity<ApplicationUser>().ToTable("Users");
-    //    builder.Entity<ApplicationRole>().ToTable("Roles");
-    //    builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>().ToTable("UserRoles");
-    //    builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>>().ToTable("UserClaims");
-    //    builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>>().ToTable("UserLogins");
-    //    builder.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
-    //    builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>().ToTable("UserTokens");
-    //}
+     
 }

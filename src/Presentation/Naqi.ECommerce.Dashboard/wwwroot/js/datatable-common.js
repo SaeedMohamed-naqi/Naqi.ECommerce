@@ -38,6 +38,7 @@
      * @param {string} [config.countBadgeSelector] - element to update with recordsFiltered on every draw
      * @param {string} [config.searchInputSelector] - input wired to table.search() with debounce
      * @param {object} [config.dataTableOptions] - any extra raw DataTables options to merge in/override
+     * @param {function} [config.rowClickUrl] - (rowData) => url; if provided, clicking a row (outside interactive elements) navigates there
      * @returns {DataTable} the underlying DataTables API instance
      */
     window.NaqiDataTable = {
@@ -83,6 +84,23 @@
                     const value = this.value;
                     searchTimeout = setTimeout(() => table.search(value).draw(), 300);
                 });
+            }
+
+            // Clickable rows - navigates to rowClickUrl(rowData), but ignores
+            // clicks on buttons/links/inputs inside the row (so action icons,
+            // checkboxes, etc. still work without also triggering navigation).
+            if (config.rowClickUrl) {
+                $(tableSelector).on("click", "tbody tr", function (event) {
+                    if ($(event.target).closest("a, button, input, .no-row-click").length) return;
+
+                    const rowData = table.row(this).data();
+                    if (!rowData) return;
+
+                    const url = config.rowClickUrl(rowData);
+                    if (url) window.location.href = url;
+                });
+
+                $(tableSelector).find("tbody").css("cursor", "pointer");
             }
 
             return table;

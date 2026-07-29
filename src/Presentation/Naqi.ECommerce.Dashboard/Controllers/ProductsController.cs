@@ -26,6 +26,16 @@ public class ProductsController : Controller
         return View();
     }
 
+    // Read-only product details, opened by clicking a row in the Index table.
+    public async Task<IActionResult> Details(long id)
+    {
+        var product = await _mediator.Send(new GetProductDetailsQuery(id));
+        if (product is null)
+            return NotFound();
+
+        return View(product);
+    }
+
     // DataTables server-side processing endpoint. DataTables POSTs its
     // paging/search/sort state as form fields using bracket notation
     // (draw, start, length, search[value], order[0][column], etc.) -

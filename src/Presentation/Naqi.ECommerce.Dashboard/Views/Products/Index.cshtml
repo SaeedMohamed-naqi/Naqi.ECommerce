@@ -65,6 +65,7 @@
                 order: [[6, 'desc']],
                 countBadgeSelector: '#products-count',
                 searchInputSelector: '#products-search',
+                rowClickUrl: (row) => '@Url.Action("Details", "Products")' + '/' + row.id,
                 emptyMessage: `<div class="table-empty-state">
                                   <i class="fa-solid fa-box-open"></i>
                                   @Localizer["NoProductsYet"]

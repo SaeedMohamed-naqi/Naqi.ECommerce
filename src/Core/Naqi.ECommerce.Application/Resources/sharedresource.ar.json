@@ -55,5 +55,32 @@
 
   "SyncCompleteTitle": "اكتملت المزامنة",
   "SyncCompleteText": "تم جلب {fetched}، إنشاء {created}، تحديث {updated}.",
-  "SyncFailedTitle": "فشلت المزامنة"
+  "SyncFailedTitle": "فشلت المزامنة",
+
+  "ErrorTitle": "حدث خطأ ما",
+  "ErrorMessage": "حدث خطأ غير متوقع. تم إبلاغ فريقنا بذلك.",
+  "RequestId": "معرّف الطلب",
+  "BackToDashboard": "العودة للوحة التحكم",
+
+  "Back": "رجوع",
+  "General": "عام",
+  "SyncInfo": "معلومات المزامنة",
+  "Media": "الوسائط",
+  "WebsiteData": "بيانات الموقع",
+
+  "TitleEn": "العنوان (إنجليزي)",
+  "TitleAr": "العنوان (عربي)",
+  "DescriptionEn": "الوصف (إنجليزي)",
+  "DescriptionAr": "الوصف (عربي)",
+  "Sku": "رمز المنتج",
+  "Vertical": "عمودي",
+  "Yes": "نعم",
+  "No": "لا",
+  "Primary": "الصورة الرئيسية",
+  "Warranty": "الضمان",
+  "Accessories": "الملحقات",
+  "Guidelines": "الإرشادات",
+  "OtherSpecifications": "مواصفات أخرى",
+  "NoMediaSynced": "لا توجد وسائط تمت مزامنتها لهذا المنتج.",
+  "NoWebsiteContentSynced": "لا توجد بيانات موقع تمت مزامنتها لهذا المنتج."
 }
