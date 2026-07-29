@@ -97,5 +97,34 @@
 
   "Created": "تاريخ الإنشاء",
   "LastModified": "آخر تعديل",
-  "SyncInfoNote": "هذا عرض للقراءة فقط لكل ما تمت مزامنته حالياً من الميدلوير لهذا المنتج."
+  "SyncInfoNote": "هذا عرض للقراءة فقط لكل ما تمت مزامنته حالياً من الميدلوير لهذا المنتج.",
+
+  "SyncCategories": "مزامنة الفئات",
+  "NoCategoriesYet": "لا توجد فئات بعد - اضغط \"مزامنة الفئات\" للاستيراد من الميدلوير.",
+  "Parent": "الفئة الأم",
+  "Active": "نشط",
+  "Featured": "مميز",
+  "DisplayOrder": "الترتيب",
+
+  "Slug": "الرابط المختصر",
+  "RootLevel": "مستوى جذري (بدون فئة أم)",
+  "EndsAt": "تاريخ الانتهاء",
+  "DisplaySettings": "إعدادات العرض",
+  "Seo": "تحسين محركات البحث",
+  "VisibilityChannel": "مكان الظهور",
+  "WebsiteAndApp": "الموقع والتطبيق",
+  "WebsiteOnly": "الموقع فقط",
+  "AppOnly": "التطبيق فقط",
+  "IncludeSubcategoryProducts": "تضمين منتجات الفئات الفرعية",
+  "ShowSubcategories": "إظهار الفئات الفرعية",
+  "MetaTitle": "عنوان الميتا",
+  "MetaDescription": "وصف الميتا",
+  "MetaKeywords": "كلمات الميتا المفتاحية",
+  "CanonicalUrl": "الرابط الأساسي",
+  "NoSeoDataSynced": "لا توجد بيانات تحسين محركات بحث لهذه الفئة.",
+  "NoBannersSynced": "لا توجد بانرات تمت مزامنتها لهذه الفئة.",
+  "Subcategories": "الفئات الفرعية",
+  "NoSubcategories": "لا توجد فئات فرعية لهذه الفئة.",
+  "NoProductsInCategory": "لا توجد منتجات في هذه الفئة بعد.",
+  "Banners": "البانرات"
 }

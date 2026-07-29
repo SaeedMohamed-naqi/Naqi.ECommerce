@@ -97,5 +97,34 @@
 
   "Created": "Created",
   "LastModified": "Last Modified",
-  "SyncInfoNote": "This is a read-only view of everything currently synced from the middleware for this product."
+  "SyncInfoNote": "This is a read-only view of everything currently synced from the middleware for this product.",
+
+  "SyncCategories": "Sync Categories",
+  "NoCategoriesYet": "No categories yet - click \"Sync Categories\" to import from the middleware.",
+  "Parent": "Parent",
+  "Active": "Active",
+  "Featured": "Featured",
+  "DisplayOrder": "Order",
+
+  "Slug": "Slug",
+  "RootLevel": "Root level (no parent)",
+  "EndsAt": "Ends At",
+  "DisplaySettings": "Display Settings",
+  "Seo": "SEO",
+  "VisibilityChannel": "Visibility",
+  "WebsiteAndApp": "Website & Mobile App",
+  "WebsiteOnly": "Website only",
+  "AppOnly": "App only",
+  "IncludeSubcategoryProducts": "Include subcategory products",
+  "ShowSubcategories": "Show subcategories",
+  "MetaTitle": "Meta title",
+  "MetaDescription": "Meta description",
+  "MetaKeywords": "Meta keywords",
+  "CanonicalUrl": "Canonical URL",
+  "NoSeoDataSynced": "No SEO data synced for this category.",
+  "NoBannersSynced": "No banners synced for this category.",
+  "Subcategories": "Subcategories",
+  "NoSubcategories": "This category has no subcategories.",
+  "NoProductsInCategory": "No products in this category yet.",
+  "Banners": "Banners"
 }

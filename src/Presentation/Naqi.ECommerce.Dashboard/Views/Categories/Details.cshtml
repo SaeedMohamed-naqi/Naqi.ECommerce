@@ -98,6 +98,9 @@
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-seo" type="button">@Localizer["Seo"]</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-products" type="button">@Localizer["Products"] (@Model.Products.Count)</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-banners" type="button">@Localizer["Banners"] (@Model.Banners.Count)</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -234,6 +237,63 @@
                     }
                 </div>
 
+                @* ---- Products ---- *@
+                <div class="tab-pane fade" id="tab-products" role="tabpanel">
+                    @if (Model.Products.Count == 0)
+                    {
+                        <div class="table-empty-state">
+                            <i class="fa-solid fa-box"></i>
+                            @Localizer["NoProductsInCategory"]
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>@Localizer["Products"]</th>
+                                        <th>@Localizer["Price"]</th>
+                                        <th>@Localizer["Quantity"]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr class="product-row" style="cursor:pointer;" data-href="@Url.Action("Details", "Products", new { id = product.Id })">
+                                            <td style="width:56px;">
+                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                {
+                                                    <img src="@product.ImageUrl" alt="@product.NameEn" class="table-thumb" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="table-thumb-placeholder"><i class="fa-solid fa-image"></i></div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="table-primary-text">@product.NameEn</div>
+                                                <div class="table-secondary-text">@product.NameAr</div>
+                                            </td>
+                                            <td>
+                                                <span class="amount-current">@product.Price.ToString("N2")</span>
+                                                @if (product.OldPrice.HasValue)
+                                                {
+                                                    <span class="amount-old">@product.OldPrice.Value.ToString("N2")</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="status-badge @(product.StockQuantity > 0 ? "status-success" : "status-danger")">@product.StockQuantity</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
                 @* ---- Banners ---- *@
                 <div class="tab-pane fade" id="tab-banners" role="tabpanel">
                     @if (Model.Banners.Count == 0)
@@ -325,6 +385,12 @@
             document.querySelectorAll('[data-utc]').forEach(function (el) {
                 const utcValue = el.getAttribute('data-utc');
                 el.textContent = utcValue ? NaqiDateTime.toLocal(utcValue) : '-';
+            });
+
+            document.querySelectorAll('.product-row[data-href]').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    window.location.href = row.dataset.href;
+                });
             });
         });
     </script>

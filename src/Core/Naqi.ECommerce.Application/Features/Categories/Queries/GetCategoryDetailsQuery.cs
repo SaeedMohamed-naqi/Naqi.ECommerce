@@ -16,6 +16,10 @@ public record CategoryBannerDto(
 
 public record SubcategoryDto(long Id, string NameEn, string NameAr, bool IsActive);
 
+public record CategoryProductDto(
+    long Id, string NameEn, string NameAr, decimal Price, decimal? OldPrice,
+    int StockQuantity, string? ImageUrl);
+
 public record CategoryDetailsDto(
     long Id,
     long? ExternalCategoryId,
@@ -41,6 +45,7 @@ public record CategoryDetailsDto(
     string? CanonicalUrl,
     IReadOnlyList<CategoryBannerDto> Banners,
     IReadOnlyList<SubcategoryDto> Subcategories,
+    IReadOnlyList<CategoryProductDto> Products,
     int ProductCount,
     DateTime CreatedAtUtc,
     Guid? CreatedBy,
@@ -75,9 +80,14 @@ public class GetCategoryDetailsQueryHandler : IRequestHandler<GetCategoryDetails
             .Select(c => new SubcategoryDto(c.Id, c.NameEn, c.NameAr, c.IsActive))
             .ToListAsync(cancellationToken);
 
-        var productCount = await _context.Products
-            .CountAsync(p => p.CategoryId == category.Id, cancellationToken);
+        var products = await _context.Products
+            .AsNoTracking()
+            .Where(p => p.CategoryId == category.Id)
+            .OrderBy(p => p.NameEn)
+            .Select(p => new CategoryProductDto(
+                p.Id, p.NameEn, p.NameAr, p.Price, p.OldPrice, p.StockQuantity, p.ImageUrl))
+            .ToListAsync(cancellationToken);
 
-        return dto with { Subcategories = subcategories, ProductCount = productCount };
+        return dto with { Subcategories = subcategories, Products = products, ProductCount = products.Count };
     }
 }

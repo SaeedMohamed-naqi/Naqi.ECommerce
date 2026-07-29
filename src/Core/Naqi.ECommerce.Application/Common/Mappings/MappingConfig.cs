@@ -13,8 +13,7 @@ public class MappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-       
-
+    
         // ---- ProductSpecification -> SpecificationDto, ProductCategory -> UiCategoryDto ----
         // Property names already align 1:1, so Mapster's convention would
         // likely handle these automatically - registered explicitly anyway
@@ -70,10 +69,11 @@ public class MappingConfig : IRegister
             .Map(dest => dest.ParentNameEn, src => src.Parent != null ? src.Parent.NameEn : null)
             .Map(dest => dest.ParentNameAr, src => src.Parent != null ? src.Parent.NameAr : null)
             .Ignore(dest => dest.Subcategories)
+            .Ignore(dest => dest.Products)
             .Ignore(dest => dest.ProductCount);
 
         config.NewConfig<CategoryBanner, Naqi.ECommerce.Application.Features.Categories.Queries.CategoryBannerDto>();
 
-      
+       
     }
 }
