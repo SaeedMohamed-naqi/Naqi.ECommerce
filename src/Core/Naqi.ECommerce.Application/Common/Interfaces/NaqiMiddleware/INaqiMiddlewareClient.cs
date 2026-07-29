@@ -16,4 +16,10 @@ public interface INaqiMiddlewareClient
     /// matches the legacy GetCategories() action's behavior).
     /// </summary>
     Task<MiddlewareCategoryTreeResponse> GetCategoryTreeAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Fetches all currently active offer groups in one call (no
+    /// pagination - matches the legacy GetOffers() action's behavior).
+    /// </summary>
+    Task<MiddlewareActiveOffersResponse> GetActiveOffersAsync(CancellationToken cancellationToken = default);
 }

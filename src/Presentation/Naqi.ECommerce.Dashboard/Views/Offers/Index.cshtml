@@ -1,0 +1,105 @@
+﻿@* src/Presentation/Naqi.ECommerce.Dashboard/Views/Offers/Index.cshtml *@
+@{
+    ViewData["Title"] = Localizer["Offers"];
+    Layout = "_Layout";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="list-toolbar">
+    <div class="list-toolbar-left">
+        <h4 class="list-title">@Localizer["Offers"]</h4>
+        <span class="list-count-badge">
+            <i class="fa-solid fa-tags"></i>
+            <span id="offers-count">0</span> @Localizer["Offers"]
+        </span>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="list-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="offers-search" class="list-search-input" placeholder="@Localizer["Search"]" />
+        </div>
+
+        <button id="sync-offers-btn" type="button" class="btn btn-pill-primary d-flex align-items-center gap-2"
+                data-success-title="@Localizer["SyncCompleteTitle"]"
+                data-success-text="@Localizer["SyncCompleteText"]"
+                data-error-title="@Localizer["SyncFailedTitle"]">
+            <i class="fa-solid fa-rotate" id="sync-offers-icon"></i>
+            <span id="sync-offers-label">@Localizer["SyncOffers"]</span>
+        </button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table id="offers-table" class="table w-100">
+        <thead>
+            <tr>
+                <th></th>
+                <th>@Localizer["Offers"]</th>
+                <th>@Localizer["ExternalId"]</th>
+                <th>@Localizer["Big"]</th>
+                <th>@Localizer["EndsAt"]</th>
+                <th>@Localizer["Products"]</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            const noImageIcon = '<div class="table-thumb-placeholder"><i class="fa-solid fa-tag"></i></div>';
+
+            NaqiDataTable.init('#offers-table', {
+                url: '@Url.Action("GetData", "Offers")',
+                order: [[4, 'desc']],
+                countBadgeSelector: '#offers-count',
+                rowClickUrl: (row) => '@Url.Action("Details", "Offers")' + '/' + row.id,
+                searchInputSelector: '#offers-search',
+                emptyMessage: `<div class="table-empty-state">
+                                  <i class="fa-solid fa-tags"></i>
+                                  @Localizer["NoOffersYet"]
+                               </div>`,
+                columns: [
+                    {
+                        data: 'iconUrl',
+                        orderable: false,
+                        render: function (data, type, row) {
+                            return data
+                                ? `<img src="${data}" alt="${row.nameEn}" class="table-thumb" />`
+                                : noImageIcon;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (row) {
+                            const swatch = row.color
+                                ? `<span class="d-inline-block rounded-circle me-1" style="width:12px;height:12px;background:${row.color};border:1px solid #ddd;"></span>`
+                                : '';
+                            return `<div class="table-primary-text">${swatch}${row.nameEn}</div>` +
+                                   `<div class="table-secondary-text">${row.nameAr}</div>`;
+                        }
+                    },
+                    {
+                        data: 'externalOfferGroupId',
+                        render: (d) => `<span class="mono-chip">${d}</span>`
+                    },
+                    {
+                        data: 'isBig',
+                        render: (d) => d ? '<i class="fa-solid fa-star text-warning"></i>' : ''
+                    },
+                    {
+                        data: 'expireAtUtc',
+                        render: (d) => d ? NaqiDateTime.toLocal(d) : '-'
+                    },
+                    {
+                        data: 'productCount',
+                        render: (d) => `<span class="pill-badge">${d}</span>`
+                    }
+                ]
+            });
+        });
+    </script>
+    <script src="~/js/offers-sync.js"></script>
+}

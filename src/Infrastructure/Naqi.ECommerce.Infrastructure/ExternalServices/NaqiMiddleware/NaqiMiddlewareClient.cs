@@ -32,8 +32,7 @@ public class NaqiMiddlewareClient : INaqiMiddlewareClient
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             PropertyNameCaseInsensitive = true,
             NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-            //Converters = { new LenientStringConverter() } // still useful for any genuinely string-typed field that occasionally arrives as a bare number
-        };
+         };
     }
 
     public async Task<MiddlewareProductsResponse> GetProductsPageAsync(
@@ -74,5 +73,22 @@ public class NaqiMiddlewareClient : INaqiMiddlewareClient
             _jsonOptions, cancellationToken);
 
         return result ?? new MiddlewareCategoryTreeResponse { Status = false, Data = new() };
+    }
+
+    public async Task<MiddlewareActiveOffersResponse> GetActiveOffersAsync(CancellationToken cancellationToken = default)
+    {
+        var token = $"{DateTime.Now:d@M@yyyy@H@m@s}@{_apiToken}";
+        _httpClient.DefaultRequestHeaders.Remove("key");
+        _httpClient.DefaultRequestHeaders.Add("key", token);
+
+        using var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+        using var response = await _httpClient.PostAsync("api/get-active-offers", content, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<MiddlewareActiveOffersResponse>(
+            _jsonOptions, cancellationToken);
+
+        return result ?? new MiddlewareActiveOffersResponse { Data = new() };
     }
 }

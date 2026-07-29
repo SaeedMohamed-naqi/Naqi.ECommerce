@@ -214,7 +214,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.CategoryBanner", b =>
@@ -265,7 +265,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CategoryBanners");
+                    b.ToTable("CategoryBanners", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.OfferGroup", b =>
@@ -319,7 +319,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OfferGroups");
+                    b.ToTable("OfferGroups", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.Product", b =>
@@ -439,7 +439,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductCategory", b =>
@@ -480,7 +480,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductCategories");
+                    b.ToTable("ProductCategories", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductInstallation", b =>
@@ -515,7 +515,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductInstallations");
+                    b.ToTable("ProductInstallations", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductOffer", b =>
@@ -544,7 +544,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOffers");
+                    b.ToTable("ProductOffers", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductSpecification", b =>
@@ -581,7 +581,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductSpecifications");
+                    b.ToTable("ProductSpecifications", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductVariant", b =>
@@ -631,7 +631,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariants");
+                    b.ToTable("ProductVariants", (string)null);
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Infrastructure.Identity.ApplicationRole", b =>

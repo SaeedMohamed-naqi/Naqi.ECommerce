@@ -13,7 +13,8 @@ public class MappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-    
+       
+
         // ---- ProductSpecification -> SpecificationDto, ProductCategory -> UiCategoryDto ----
         // Property names already align 1:1, so Mapster's convention would
         // likely handle these automatically - registered explicitly anyway
@@ -74,6 +75,14 @@ public class MappingConfig : IRegister
 
         config.NewConfig<CategoryBanner, Naqi.ECommerce.Application.Features.Categories.Queries.CategoryBannerDto>();
 
-       
+        // ---- OfferGroup -> OfferGroupDetailsDto ----
+        // Own properties align 1:1 by name - Products/ProductCount are
+        // populated separately by the query handler (from a ProductOffer
+        // join, not from OfferGroup itself), so explicitly ignored here.
+        config.NewConfig<OfferGroup, Naqi.ECommerce.Application.Features.Offers.Queries.OfferGroupDetailsDto>()
+            .Ignore(dest => dest.Products)
+            .Ignore(dest => dest.ProductCount);
+
+ 
     }
 }

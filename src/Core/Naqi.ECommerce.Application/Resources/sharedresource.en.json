@@ -126,5 +126,11 @@
   "Subcategories": "Subcategories",
   "NoSubcategories": "This category has no subcategories.",
   "NoProductsInCategory": "No products in this category yet.",
-  "Banners": "Banners"
+  "Banners": "Banners",
+
+  "Offers": "Offers",
+  "SyncOffers": "Sync Offers",
+  "NoOffersYet": "No offers yet - click \"Sync Offers\" to import from the middleware.",
+  "Big": "Big",
+  "NoProductsInOffer": "No products linked to this offer yet."
 }
