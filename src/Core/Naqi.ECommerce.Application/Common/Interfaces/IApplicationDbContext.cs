@@ -20,6 +20,7 @@ public interface IApplicationDbContext
     DbSet<ProductInstallation> ProductInstallations { get; }
     DbSet<ProductVariant> ProductVariants { get; }
     DbSet<OfferGroup> OfferGroups { get; }
+    DbSet<PromoCode> PromoCodes { get; }
     DbSet<ProductOffer> ProductOffers { get; }
     DbSet<Category> Categories { get; }
     DbSet<CategoryBanner> CategoryBanners { get; }

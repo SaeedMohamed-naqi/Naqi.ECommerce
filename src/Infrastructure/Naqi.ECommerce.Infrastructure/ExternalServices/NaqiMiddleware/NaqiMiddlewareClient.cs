@@ -91,4 +91,21 @@ public class NaqiMiddlewareClient : INaqiMiddlewareClient
 
         return result ?? new MiddlewareActiveOffersResponse { Data = new() };
     }
+
+    public async Task<MiddlewareCouponsResponse> GetCouponsAsync(CancellationToken cancellationToken = default)
+    {
+        var token = $"{DateTime.Now:d@M@yyyy@H@m@s}@{_apiToken}";
+        _httpClient.DefaultRequestHeaders.Remove("key");
+        _httpClient.DefaultRequestHeaders.Add("key", token);
+
+        using var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+        using var response = await _httpClient.PostAsync("api/coupons/info", content, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<MiddlewareCouponsResponse>(
+            _jsonOptions, cancellationToken);
+
+        return result ?? new MiddlewareCouponsResponse { Status = false, Coupons = new() };
+    }
 }

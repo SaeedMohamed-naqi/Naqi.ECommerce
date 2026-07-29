@@ -1,0 +1,106 @@
+﻿@* src/Presentation/Naqi.ECommerce.Dashboard/Views/PromoCodes/Index.cshtml *@
+@{
+    ViewData["Title"] = Localizer["PromoCodes"];
+    Layout = "_Layout";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="list-toolbar">
+    <div class="list-toolbar-left">
+        <h4 class="list-title">@Localizer["PromoCodes"]</h4>
+        <span class="list-count-badge">
+            <i class="fa-solid fa-ticket"></i>
+            <span id="promocodes-count">0</span> @Localizer["PromoCodes"]
+        </span>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="list-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="promocodes-search" class="list-search-input" placeholder="@Localizer["Search"]" />
+        </div>
+
+        <button id="sync-promocodes-btn" type="button" class="btn btn-pill-primary d-flex align-items-center gap-2"
+                data-success-title="@Localizer["SyncCompleteTitle"]"
+                data-success-text="@Localizer["SyncCompleteText"]"
+                data-error-title="@Localizer["SyncFailedTitle"]">
+            <i class="fa-solid fa-rotate" id="sync-promocodes-icon"></i>
+            <span id="sync-promocodes-label">@Localizer["SyncPromoCodes"]</span>
+        </button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table id="promocodes-table" class="table w-100">
+        <thead>
+            <tr>
+                <th>@Localizer["Code"]</th>
+                <th>@Localizer["DiscountType"]</th>
+                <th>@Localizer["Value"]</th>
+                <th>@Localizer["MinOrderAmount"]</th>
+                <th>@Localizer["Usage"]</th>
+                <th>@Localizer["Active"]</th>
+                <th>@Localizer["EndsAt"]</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            NaqiDataTable.init('#promocodes-table', {
+                url: '@Url.Action("GetData", "PromoCodes")',
+                order: [[6, 'desc']],
+                countBadgeSelector: '#promocodes-count',
+                searchInputSelector: '#promocodes-search',
+                emptyMessage: `<div class="table-empty-state">
+                                  <i class="fa-solid fa-ticket"></i>
+                                  @Localizer["NoPromoCodesYet"]
+                               </div>`,
+                columns: [
+                    {
+                        data: null,
+                        render: (row) => `<span class="mono-chip">${row.code}</span>`
+                    },
+                    {
+                        data: 'isPercentage',
+                        render: (d) => d
+                            ? '<span class="pill-badge">@Localizer["Percentage"]</span>'
+                            : '<span class="pill-badge">@Localizer["FixedAmount"]</span>'
+                    },
+                    {
+                        data: null,
+                        render: (row) => row.isPercentage ? `${row.value}%` : row.value.toFixed(2)
+                    },
+                    {
+                        data: 'minOrderAmount',
+                        render: (d) => d ? d.toFixed(2) : '-'
+                    },
+                    {
+                        data: null,
+                        render: (row) => {
+                            const used = row.usedCount ?? 0;
+                            const max = row.maxUsage;
+                            return max ? `${used} / ${max}` : `${used} / @Localizer["Unlimited"]`;
+                        }
+                    },
+                    {
+                        data: 'isActive',
+                        render: function (data) {
+                            const cls = data ? 'status-success' : 'status-danger';
+                            const label = data ? '@Localizer["Yes"]' : '@Localizer["No"]';
+                            return `<span class="status-badge ${cls}">${label}</span>`;
+                        }
+                    },
+                    {
+                        data: 'expiresAtUtc',
+                        render: (d) => d ? NaqiDateTime.toLocal(d) : '-'
+                    }
+                ]
+            });
+        });
+    </script>
+    <script src="~/js/promocodes-sync.js"></script>
+}

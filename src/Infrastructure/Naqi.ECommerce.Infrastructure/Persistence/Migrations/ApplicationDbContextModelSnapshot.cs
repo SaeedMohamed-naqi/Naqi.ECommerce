@@ -214,7 +214,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.CategoryBanner", b =>
@@ -265,7 +265,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CategoryBanners", (string)null);
+                    b.ToTable("CategoryBanners");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.OfferGroup", b =>
@@ -319,7 +319,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("OfferGroups", (string)null);
+                    b.ToTable("OfferGroups");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.Product", b =>
@@ -439,7 +439,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductCategory", b =>
@@ -480,7 +480,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductCategories", (string)null);
+                    b.ToTable("ProductCategories");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductInstallation", b =>
@@ -515,7 +515,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductInstallations", (string)null);
+                    b.ToTable("ProductInstallations");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductOffer", b =>
@@ -544,7 +544,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOffers", (string)null);
+                    b.ToTable("ProductOffers");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductSpecification", b =>
@@ -581,7 +581,7 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductSpecifications", (string)null);
+                    b.ToTable("ProductSpecifications");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductVariant", b =>
@@ -631,7 +631,79 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariants", (string)null);
+                    b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.PromoCode", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DiscountType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ExternalPromoId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAvailableForUser")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPercentage")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("MaxUsage")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("MinOrderAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("UsageExhausted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UsageTypeLabel")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UsedCount")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PromoCodes");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Infrastructure.Identity.ApplicationRole", b =>

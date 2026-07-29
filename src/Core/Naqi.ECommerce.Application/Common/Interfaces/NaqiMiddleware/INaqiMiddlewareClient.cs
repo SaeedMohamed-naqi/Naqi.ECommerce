@@ -22,4 +22,10 @@ public interface INaqiMiddlewareClient
     /// pagination - matches the legacy GetOffers() action's behavior).
     /// </summary>
     Task<MiddlewareActiveOffersResponse> GetActiveOffersAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Fetches all active promo codes/coupons in one call (no pagination -
+    /// matches the legacy GetPromoCodes() action's behavior).
+    /// </summary>
+    Task<MiddlewareCouponsResponse> GetCouponsAsync(CancellationToken cancellationToken = default);
 }

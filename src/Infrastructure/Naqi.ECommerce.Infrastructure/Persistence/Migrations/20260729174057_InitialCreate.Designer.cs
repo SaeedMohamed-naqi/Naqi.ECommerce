@@ -12,8 +12,8 @@ using Naqi.ECommerce.Infrastructure.Persistence;
 namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260729104042_AddCategories")]
-    partial class AddCategories
+    [Migration("20260729174057_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

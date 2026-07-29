@@ -29,6 +29,7 @@ public class ApplicationDbContext
     public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductInstallation> ProductInstallations => Set<ProductInstallation>();
+    public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<OfferGroup> OfferGroups => Set<OfferGroup>();
     public DbSet<ProductOffer> ProductOffers => Set<ProductOffer>();
