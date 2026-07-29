@@ -84,25 +84,16 @@
                 <span class="sidebar-item-title">@Localizer["Categories"]</span>
             </a>
 
-            <h5 class="sidebar-main-menu-label">@Localizer["Sales"]</h5>
+             
 
-            <a class="sidebar-item @ActiveClass("Orders")" asp-controller="Orders" asp-action="Index">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span class="sidebar-item-title">@Localizer["Orders"]</span>
-            </a>
-            <a class="sidebar-item @ActiveClass("Customers")" asp-controller="Customers" asp-action="Index">
-                <i class="fa-solid fa-users"></i>
-                <span class="sidebar-item-title">@Localizer["Customers"]</span>
-            </a>
-
-            @if (User.IsInRole(Naqi.ECommerce.Infrastructure.Identity.Roles.SuperAdmin))
+          @*   @if (User.IsInRole(Naqi.ECommerce.Infrastructure.Identity.Roles.SuperAdmin))
             {
                 <h5 class="sidebar-main-menu-label">@Localizer["Administration"]</h5>
                 <a class="sidebar-item @ActiveClass("AdminUsers")" asp-controller="AdminUsers" asp-action="Index">
                     <i class="fa-solid fa-user-gear"></i>
                     <span class="sidebar-item-title">@Localizer["AdminUsers"]</span>
                 </a>
-            }
+            } *@
         </aside>
 
         <div class="dashboard-main">
