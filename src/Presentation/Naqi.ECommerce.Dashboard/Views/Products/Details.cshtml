@@ -85,6 +85,9 @@
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-specifications" type="button">@Localizer["Specifications"] (@Model.Specifications.Count)</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-variants" type="button">@Localizer["Variants"] (@Model.Variants.Count)</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-website" type="button">@Localizer["WebsiteData"]</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -115,6 +118,22 @@
                             @if (Model.TotalRating > 0)
                             {
                                 <span class="table-secondary-text"><i class="fa-solid fa-star text-warning"></i> @Model.RatingAverage.ToString("0.0") (@Model.TotalRating)</span>
+                            }
+                        </div>
+                    }
+
+                    @if (Model.Offers.Count > 0)
+                    {
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @foreach (var offer in Model.Offers.Where(o => o.IsActive))
+                            {
+                                <span class="status-badge" style="background:#@(offer.Color?.TrimStart('#') ?? "3553ff")22; color:#@(offer.Color?.TrimStart('#') ?? "3553ff");">
+                                    @if (!string.IsNullOrEmpty(offer.IconUrl))
+                                    {
+                                        <img src="@offer.IconUrl" style="width:12px;height:12px;object-fit:contain;" alt="" />
+                                    }
+                                    @offer.NameEn
+                                </span>
                             }
                         </div>
                     }
@@ -269,6 +288,67 @@
                                             <td dir="rtl">@spec.TitleAr</td>
                                             <td>@spec.ValueEn</td>
                                             <td dir="rtl">@spec.ValueAr</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+
+                @* ---- Variants ---- *@
+                <div class="tab-pane fade" id="tab-variants" role="tabpanel">
+                    @if (Model.Variants.Count == 0)
+                    {
+                        <div class="table-empty-state">
+                            <i class="fa-solid fa-swatchbook"></i>
+                            @Localizer["NoVariantsSynced"]
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>@Localizer["Products"]</th>
+                                        <th>@Localizer["Color"]</th>
+                                        <th>@Localizer["Price"]</th>
+                                        <th>@Localizer["Quantity"]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var variant in Model.Variants)
+                                    {
+                                        <tr>
+                                            <td style="width:56px;">
+                                                @if (!string.IsNullOrEmpty(variant.ImageUrl))
+                                                {
+                                                    <img src="@variant.ImageUrl" alt="@variant.NameEn" class="table-thumb" />
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="table-primary-text">@variant.NameEn</div>
+                                                <div class="table-secondary-text">@variant.NameAr</div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(variant.ColorCode))
+                                                {
+                                                    <span class="d-inline-block rounded-circle me-1" style="width:14px;height:14px;background:#@variant.ColorCode;border:1px solid #ddd;"></span>
+                                                }
+                                                @variant.ColorEn
+                                            </td>
+                                            <td>
+                                                <span class="amount-current">@variant.Price.ToString("N2")</span>
+                                                @if (variant.OldPrice.HasValue)
+                                                {
+                                                    <span class="amount-old">@variant.OldPrice.Value.ToString("N2")</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="status-badge @(variant.StockQuantity > 0 ? "status-success" : "status-danger")">@variant.StockQuantity</span>
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>

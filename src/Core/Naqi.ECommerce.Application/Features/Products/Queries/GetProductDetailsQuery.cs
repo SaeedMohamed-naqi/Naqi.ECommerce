@@ -12,6 +12,10 @@ public record GetProductDetailsQuery(long Id) : IRequest<ProductDetailsDto?>;
 public record SpecificationDto(string TitleEn, string TitleAr, string ValueEn, string ValueAr);
 public record UiCategoryDto(string NameEn, string NameAr, string? Slug, string? ImageUrl, bool IsPrimary, bool IsLeaf);
 public record InstallationDto(string TitleEn, string TitleAr, decimal Price, bool IsSelected);
+public record VariantDto(
+    string NameEn, string NameAr, string? ColorEn, string? ColorAr, string? ColorCode,
+    decimal Price, decimal? OldPrice, int StockQuantity, string? ImageUrl);
+public record OfferDto(string NameEn, string NameAr, string? IconUrl, string? Color, bool IsBig, DateTime? ExpireAtUtc, bool IsActive);
 
 public record ProductDetailsDto(
     long Id,
@@ -34,6 +38,8 @@ public record ProductDetailsDto(
     IReadOnlyList<SpecificationDto> Specifications,
     IReadOnlyList<UiCategoryDto> UiCategories,
     IReadOnlyList<InstallationDto> Installations,
+    IReadOnlyList<VariantDto> Variants,
+    IReadOnlyList<OfferDto> Offers,
     string? TagEn,
     string? TagAr,
     string? SubtagEn,
@@ -67,6 +73,9 @@ public class GetProductDetailsQueryHandler : IRequestHandler<GetProductDetailsQu
             .Include(p => p.Specifications)
             .Include(p => p.UiCategories)
             .Include(p => p.Installations)
+            .Include(p => p.Variants)
+            .Include(p => p.Offers)
+                .ThenInclude(o => o.OfferGroup)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         if (product is null) return null;

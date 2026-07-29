@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Naqi.ECommerce.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Naqi.ECommerce.Infrastructure.Persistence;
 namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260729092537_addproductvarints")]
+    partial class addproductvarints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,60 +171,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.OfferGroup", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Color")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ExpireAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("ExternalOfferGroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("IconUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsBig")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModifiedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("NameAr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NameEn")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OfferGroups");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.Product", b =>
@@ -418,35 +367,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductInstallations");
-                });
-
-            modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductOffer", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ExternalOfferId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("OfferGroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OfferGroupId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductOffers");
                 });
 
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductSpecification", b =>
@@ -720,23 +640,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductOffer", b =>
-                {
-                    b.HasOne("Naqi.ECommerce.Domain.Entities.OfferGroup", "OfferGroup")
-                        .WithMany()
-                        .HasForeignKey("OfferGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Naqi.ECommerce.Domain.Entities.Product", null)
-                        .WithMany("Offers")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OfferGroup");
-                });
-
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.ProductSpecification", b =>
                 {
                     b.HasOne("Naqi.ECommerce.Domain.Entities.Product", null)
@@ -763,8 +666,6 @@ namespace Naqi.ECommerce.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Naqi.ECommerce.Domain.Entities.Product", b =>
                 {
                     b.Navigation("Installations");
-
-                    b.Navigation("Offers");
 
                     b.Navigation("Specifications");
 

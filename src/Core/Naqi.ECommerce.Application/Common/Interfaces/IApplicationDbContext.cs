@@ -15,10 +15,13 @@ namespace Naqi.ECommerce.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+    DbSet<OfferGroup> OfferGroups { get; }
+    DbSet<ProductOffer> ProductOffers { get; }
     DbSet<Product> Products { get; }
     DbSet<Category> Categories { get; }
     DbSet<ProductSpecification> ProductSpecifications { get; }
     DbSet<ProductCategory> ProductCategories { get; }
+    DbSet<ProductVariant> ProductVariants { get; }
 
     DbSet<ProductInstallation> ProductInstallations { get; }
 

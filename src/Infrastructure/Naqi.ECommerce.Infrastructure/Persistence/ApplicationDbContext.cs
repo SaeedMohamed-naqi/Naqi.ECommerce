@@ -29,10 +29,11 @@ public class ApplicationDbContext
     public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductInstallation> ProductInstallations => Set<ProductInstallation>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<OfferGroup> OfferGroups => Set<OfferGroup>();
+    public DbSet<ProductOffer> ProductOffers => Set<ProductOffer>();
     public DbSet<Category> Categories => Set<Category>();
-    //public DbSet<Order> Orders => Set<Order>();
-    //public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-    //public DbSet<Customer> Customers => Set<Customer>();
+ 
 
     // Auto-populates CreatedBy/CreatedAtUtc on insert and
     // LastModifiedBy/LastModifiedAtUtc on update, for every entity that
@@ -106,6 +107,33 @@ public class ApplicationDbContext
 
             entity.Metadata.FindNavigation(nameof(Product.Installations))!
                 .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
+
+            // ---- Product -> ProductVariant (variants, same pattern) ----
+            entity.HasMany(p => p.Variants)
+                .WithOne()
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Metadata.FindNavigation(nameof(Product.Variants))!
+                .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
+
+            // ---- Product -> ProductOffer (thin join row, not a full snapshot) ----
+            entity.HasMany(p => p.Offers)
+                .WithOne()
+                .HasForeignKey(o => o.ProductId)
+                .OnDelete(DeleteBehavior.Cascade); // deleting a Product removes its offer links
+
+            entity.Metadata.FindNavigation(nameof(Product.Offers))!
+                .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
+        });
+
+        // ---- ProductOffer -> OfferGroup (shared reference data) ----
+        builder.Entity<ProductOffer>(entity =>
+        {
+            entity.HasOne(o => o.OfferGroup)
+                .WithMany()
+                .HasForeignKey(o => o.OfferGroupId)
+                .OnDelete(DeleteBehavior.Restrict); // never cascade-delete shared OfferGroup rows via a product offer
         });
 
         // ---- Force every DateTime to be treated as UTC on read ----

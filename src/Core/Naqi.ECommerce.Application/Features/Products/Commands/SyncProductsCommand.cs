@@ -110,6 +110,8 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
                         .Include(p => p.Specifications)
                         .Include(p => p.UiCategories)
                         .Include(p => p.Installations)
+                        .Include(p => p.Variants)
+                        .Include(p => p.Offers)
                         .FirstOrDefaultAsync(p => p.ExternalProductId == item.ProductId, cancellationToken);
 
                     Product product;
@@ -143,6 +145,23 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
                             i.InstallationId, i.TitleEn, i.TitleAr, i.Price, i.IsSelected == 1));
 
                     product.SyncInstallations(installationData);
+
+                    var variantData = (item.Variants ?? new List<Application.Common.Interfaces.NaqiMiddleware.MiddlewareVariant>())
+                        .Select(v => new ProductVariantSyncData(
+                            v.Id, v.ProductNameEn, v.ProductNameAr, v.ColorEn, v.ColorAr, v.ColorCode,
+                            v.OnSalePrice, v.ProductPrice != v.OnSalePrice ? v.ProductPrice : null,
+                            v.ProductQnty, v.ProductMedia));
+
+                    product.SyncVariants(variantData);
+
+                    var offerData = new List<ProductOfferSyncData>();
+                    foreach (var offer in item.Offers ?? new List<Application.Common.Interfaces.NaqiMiddleware.MiddlewareOffer>())
+                    {
+                        var offerGroupId = await ResolveOfferGroupAsync(offer, cancellationToken);
+                        offerData.Add(new ProductOfferSyncData(offer.OfferId, offerGroupId, offer.Status == 1));
+                    }
+
+                    product.SyncOffers(offerData);
                 }
 
                 totalFetched += page.Data.Count;
@@ -200,5 +219,36 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         _context.Categories.Add(newCategory);
         await _context.SaveChangesAsync(cancellationToken);
         return newCategory.Id;
+    }
+
+    // Resolves (or creates) the shared OfferGroup for one offer entry -
+    // same find-or-create pattern as ResolveCategoryAsync, since offer
+    // groups are shared campaigns rather than per-product data.
+    private async Task<long> ResolveOfferGroupAsync(
+        Naqi.ECommerce.Application.Common.Interfaces.NaqiMiddleware.MiddlewareOffer offer,
+        CancellationToken cancellationToken)
+    {
+        var group = offer.OfferGroup;
+
+        var existingGroup = await _context.OfferGroups
+            .FirstOrDefaultAsync(g => g.ExternalOfferGroupId == offer.OfferGroupId, cancellationToken);
+
+        var nameEn = group?.OfferNameEn ?? $"Offer Group {offer.OfferGroupId}";
+        var nameAr = group?.OfferNameAr ?? nameEn;
+        var iconUrl = group?.OfferIcon;
+        var color = group?.OfferColor;
+        var isBig = group?.IsBig ?? false;
+        var expireAtUtc = group?.ExpireAt?.UtcDateTime;
+
+        if (existingGroup is not null)
+        {
+            existingGroup.UpdateFromSync(nameEn, nameAr, iconUrl, color, isBig, expireAtUtc);
+            return existingGroup.Id;
+        }
+
+        var newGroup = new OfferGroup(offer.OfferGroupId, nameEn, nameAr, iconUrl, color, isBig, expireAtUtc);
+        _context.OfferGroups.Add(newGroup);
+        await _context.SaveChangesAsync(cancellationToken);
+        return newGroup.Id;
     }
 }

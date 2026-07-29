@@ -78,6 +78,12 @@ public class Product : BaseAuditableEntity
     private readonly List<ProductInstallation> _installations = new();
     public IReadOnlyCollection<ProductInstallation> Installations => _installations.AsReadOnly();
 
+    private readonly List<ProductVariant> _variants = new();
+    public IReadOnlyCollection<ProductVariant> Variants => _variants.AsReadOnly();
+
+    private readonly List<ProductOffer> _offers = new();
+    public IReadOnlyCollection<ProductOffer> Offers => _offers.AsReadOnly();
+
     private Product() { } // EF Core needs a parameterless constructor
 
     public Product(string nameEn, string nameAr, string sku, decimal price, int stockQuantity, long categoryId)
@@ -263,6 +269,60 @@ public class Product : BaseAuditableEntity
             }
         }
     }
+
+    // Same upsert-and-prune pattern, for the middleware's variants array.
+    public void SyncVariants(IEnumerable<ProductVariantSyncData> incoming)
+    {
+        var incomingList = incoming.ToList();
+        var incomingIds = incomingList.Select(v => v.ExternalVariantId).ToHashSet();
+
+        _variants.RemoveAll(v => !incomingIds.Contains(v.ExternalVariantId));
+
+        foreach (var varData in incomingList)
+        {
+            var existing = _variants.FirstOrDefault(v => v.ExternalVariantId == varData.ExternalVariantId);
+
+            if (existing is not null)
+            {
+                existing.UpdateFromSync(
+                    varData.NameEn, varData.NameAr, varData.ColorEn, varData.ColorAr, varData.ColorCode,
+                    varData.Price, varData.OldPrice, varData.StockQuantity, varData.ImageUrl);
+            }
+            else
+            {
+                _variants.Add(new ProductVariant(
+                    Id, varData.ExternalVariantId, varData.NameEn, varData.NameAr,
+                    varData.ColorEn, varData.ColorAr, varData.ColorCode,
+                    varData.Price, varData.OldPrice, varData.StockQuantity, varData.ImageUrl));
+            }
+        }
+    }
+
+    // Same upsert-and-prune pattern, for the middleware's offers array.
+    // OfferGroupId in each incoming item is already resolved (created if
+    // needed) by the caller, since that requires DB access this entity
+    // can't perform itself - see SyncProductsCommandHandler.ResolveOfferGroupAsync.
+    public void SyncOffers(IEnumerable<ProductOfferSyncData> incoming)
+    {
+        var incomingList = incoming.ToList();
+        var incomingIds = incomingList.Select(o => o.ExternalOfferId).ToHashSet();
+
+        _offers.RemoveAll(o => !incomingIds.Contains(o.ExternalOfferId));
+
+        foreach (var offerData in incomingList)
+        {
+            var existing = _offers.FirstOrDefault(o => o.ExternalOfferId == offerData.ExternalOfferId);
+
+            if (existing is not null)
+            {
+                existing.UpdateFromSync(offerData.OfferGroupId, offerData.IsActive);
+            }
+            else
+            {
+                _offers.Add(new ProductOffer(Id, offerData.ExternalOfferId, offerData.OfferGroupId, offerData.IsActive));
+            }
+        }
+    }
 }
 
 // Groups everything CreateFromSync/UpdateFromSync need - avoids an
@@ -319,3 +379,20 @@ public record ProductInstallationSyncData(
     string TitleAr,
     decimal Price,
     bool IsSelected);
+
+public record ProductVariantSyncData(
+    long ExternalVariantId,
+    string NameEn,
+    string NameAr,
+    string? ColorEn,
+    string? ColorAr,
+    string? ColorCode,
+    decimal Price,
+    decimal? OldPrice,
+    int StockQuantity,
+    string? ImageUrl);
+
+public record ProductOfferSyncData(
+    long ExternalOfferId,
+    long OfferGroupId,
+    bool IsActive);

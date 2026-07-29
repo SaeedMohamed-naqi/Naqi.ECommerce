@@ -1,13 +1,19 @@
 ﻿// src/Core/Naqi.ECommerce.Application/Common/Interfaces/NaqiMiddleware/MiddlewareProductDtos.cs
 //
 // Mirrors the JSON shape returned by NaqiEcommerceMiddleware's
-// /api/v2/products endpoint. Only fields actually consumed by
-// SyncProductsCommandHandler are kept strongly-typed here; anything else
-// in the real response (variants, specifications, installations, offers,
-// reviews...) is intentionally NOT modeled yet - add fields incrementally
-// as the admin panel needs to surface them. Deserialization with
-// System.Text.Json ignores unknown JSON properties by default, so this
-// is safe even though the real payload has many more fields.
+// /api/v2/products endpoint.
+//
+// IMPORTANT casing note: the global JsonSerializerOptions uses
+// PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower (see
+// NaqiMiddlewareClient), which auto-converts a PascalCase C# property
+// name into snake_case (e.g. ProductNameEn -> product_name_en) - this
+// covers most fields for free. But a few JSON keys are genuinely
+// camelCase with NO underscore (onSalePrice, productQuantity) - the
+// naming policy would generate "on_sale_price"/"product_quantity" for
+// those, which does NOT match the real key even with
+// PropertyNameCaseInsensitive=true (case-insensitivity doesn't add/remove
+// underscores). Those need an explicit [JsonPropertyName] override pinning
+// the literal wire name - already applied below for both.
 
 namespace Naqi.ECommerce.Application.Common.Interfaces.NaqiMiddleware;
 
@@ -36,14 +42,21 @@ public class MiddlewareProduct
     public string? ProductDescriptionEn { get; set; }
     public string? ProductDescriptionAr { get; set; }
     public decimal ProductPrice { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("onSalePrice")]
     public decimal OnSalePrice { get; set; }
+
     public string? ProductMedia { get; set; } // comma-separated URLs - first one is the thumbnail, all of them go to AllImageUrls
     public int Quantity { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("productQuantity")]
     public MiddlewareProductQuantity? ProductQuantity { get; set; }
+
     public List<MiddlewareVariant>? Variants { get; set; }
     public List<MiddlewareUiCategory>? UiCategories { get; set; }
     public List<MiddlewareSpecification>? Specifications { get; set; }
     public List<MiddlewareProductInstallation>? ProductInstallations { get; set; }
+    public List<MiddlewareOffer>? Offers { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
     // ---- Tag/subtag (app display) ----
@@ -80,8 +93,18 @@ public class MiddlewareVariant
 {
     public long ProductId { get; set; }
     public long Id { get; set; }
+    public string? ColorEn { get; set; }
+    public string? ColorAr { get; set; }
+    public string? ColorCode { get; set; }
+    public decimal ProductPrice { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("onSalePrice")]
+    public decimal OnSalePrice { get; set; }
+
     public int ProductQnty { get; set; }
     public string? ProductMedia { get; set; }
+    public string ProductNameEn { get; set; } = string.Empty;
+    public string ProductNameAr { get; set; } = string.Empty;
 }
 
 public class MiddlewareUiCategory
@@ -122,4 +145,27 @@ public class MiddlewareProductInstallation
     public string TitleAr { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int IsSelected { get; set; } // 1/0 in JSON - converted to bool during upsert
+}
+
+public class MiddlewareOffer
+{
+    public long OfferId { get; set; }
+    public long OfferGroupId { get; set; }
+    public long ProductId { get; set; }
+    public int Status { get; set; } // 1/0 in JSON - converted to bool during upsert
+    public MiddlewareOfferGroup? OfferGroup { get; set; }
+}
+
+public class MiddlewareOfferGroup
+{
+    public long Id { get; set; }
+    public int OrderId { get; set; }
+    public string OfferNameEn { get; set; } = string.Empty;
+    public string OfferNameAr { get; set; } = string.Empty;
+    public string? Lastwordcolor { get; set; }
+    public string? OfferIcon { get; set; }
+    public string? OfferColor { get; set; }
+    public bool IsBig { get; set; }
+    public DateTimeOffset? ExpireAt { get; set; }
+    public int Status { get; set; } // 1/0 in JSON - converted to bool during upsert
 }
