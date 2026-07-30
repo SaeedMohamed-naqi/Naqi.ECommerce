@@ -18,6 +18,33 @@ public abstract class BaseAuditableEntity : BaseEntity
     // Soft delete - e-commerce entities (Products, Categories) are usually
     // deactivated rather than hard-deleted, since Orders reference them
     // historically and can't lose that link.
-    public bool IsDeleted { get; set; }
-    public DateTime? DeletedAtUtc { get; set; }
+    public bool IsDeleted { get; private set; }
+    public DateTime? DeletedAtUtc { get; private set; }
+    public string? DeletedReason { get; private set; }
+
+    /// <summary>
+    /// Marks this entity as soft-deleted. Does NOT remove it from the
+    /// database or from any in-memory collection - callers should keep it
+    /// in place and let the EF Core global query filter (see
+    /// ApplicationDbContext.OnModelCreating) hide it from normal reads.
+    /// </summary>
+    public void SoftDelete(string? reason = null)
+    {
+        if (IsDeleted) return; // idempotent - re-deleting doesn't overwrite the original reason/timestamp
+
+        IsDeleted = true;
+        DeletedAtUtc = DateTime.UtcNow;
+        DeletedReason = reason;
+    }
+
+    /// <summary>
+    /// Reverses SoftDelete - used when something that previously
+    /// disappeared from a sync source reappears in a later run.
+    /// </summary>
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedAtUtc = null;
+        DeletedReason = null;
+    }
 }

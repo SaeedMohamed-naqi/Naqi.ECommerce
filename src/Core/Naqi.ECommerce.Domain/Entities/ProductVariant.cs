@@ -13,7 +13,7 @@ using Naqi.ECommerce.Domain.Common;
 
 namespace Naqi.ECommerce.Domain.Entities;
 
-public class ProductVariant : BaseEntity
+public class ProductVariant : BaseAuditableEntity
 {
     public long ProductId { get; private set; }
 

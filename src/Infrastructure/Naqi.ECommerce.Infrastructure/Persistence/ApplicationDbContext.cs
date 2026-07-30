@@ -29,13 +29,13 @@ public class ApplicationDbContext
     public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
     public DbSet<ProductInstallation> ProductInstallations => Set<ProductInstallation>();
-    public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<OfferGroup> OfferGroups => Set<OfferGroup>();
     public DbSet<ProductOffer> ProductOffers => Set<ProductOffer>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<CategoryBanner> CategoryBanners => Set<CategoryBanner>();
-    
+    public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
+  
 
     // Auto-populates CreatedBy/CreatedAtUtc on insert and
     // LastModifiedBy/LastModifiedAtUtc on update, for every entity that
@@ -138,6 +138,25 @@ public class ApplicationDbContext
                 .OnDelete(DeleteBehavior.Restrict); // never cascade-delete shared OfferGroup rows via a product offer
         });
 
+        // ---- Indexes on sync lookup columns ----
+        // Every sync handler does WHERE ExternalXxxId IN (...) against
+        // these columns (SyncProductsCommandHandler, SyncCategoriesCommandHandler,
+        // SyncOffersCommandHandler, SyncPromoCodesCommandHandler). None of
+        // these are foreign keys, so EF Core's convention-based
+        // auto-indexing (which only covers FK columns) never created an
+        // index for them - every sync run was doing a full table scan on
+        // these columns, and that scan gets slower as the catalog grows.
+        // This is the most likely actual cause of the intermittent
+        // "Execution Timeout Expired" errors during product sync, more
+        // than the timeout value itself. Plain (non-unique) indexes only -
+        // not enforcing uniqueness at the DB level, just speeding up the
+        // lookup.
+        builder.Entity<Product>().HasIndex(p => p.ExternalProductId);
+        builder.Entity<Category>().HasIndex(c => c.ExternalCategoryId);
+        builder.Entity<Category>().HasIndex(c => c.Slug);
+        builder.Entity<OfferGroup>().HasIndex(g => g.ExternalOfferGroupId);
+        builder.Entity<PromoCode>().HasIndex(p => p.ExternalPromoId);
+
         // ---- Category self-referencing hierarchy + banners ----
         builder.Entity<Category>(entity =>
         {
@@ -158,6 +177,36 @@ public class ApplicationDbContext
             entity.Metadata.FindNavigation(nameof(Category.Banners))!
                 .SetPropertyAccessMode(Microsoft.EntityFrameworkCore.PropertyAccessMode.Field);
         });
+
+        // ---- Global query filter: hide soft-deleted rows automatically ----
+        // Applies to every entity inheriting BaseAuditableEntity: Product
+        // and its five child collections (ProductSpecification,
+        // ProductCategory, ProductInstallation, ProductVariant,
+        // ProductOffer), plus PromoCode. Category and OfferGroup also
+        // extend BaseAuditableEntity (for audit fields) and so pick up
+        // this filter too, but nothing currently sets IsDeleted on them -
+        // only Product/PromoCode sync actually uses soft delete right
+        // now. CategoryBanner stays on plain BaseEntity (no soft delete,
+        // no filter) since Category sync is out of scope for this.
+        // Normal queries (list pages, Details pages, etc.) never see
+        // soft-deleted rows without any extra .Where() needed at each
+        // call site. Sync code that legitimately needs to see
+        // soft-deleted rows (to restore them if they reappear) uses
+        // .IgnoreQueryFilters() explicitly - see
+        // SyncProductsCommandHandler/SyncPromoCodesCommandHandler.
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            if (!typeof(Domain.Common.BaseAuditableEntity).IsAssignableFrom(entityType.ClrType))
+                continue;
+
+            var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+            var isDeletedProperty = System.Linq.Expressions.Expression.Property(
+                parameter, nameof(Domain.Common.BaseAuditableEntity.IsDeleted));
+            var notDeleted = System.Linq.Expressions.Expression.Not(isDeletedProperty);
+            var lambda = System.Linq.Expressions.Expression.Lambda(notDeleted, parameter);
+
+            builder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+        }
 
         // ---- Force every DateTime to be treated as UTC on read ----
         // SQL Server's datetime2 has no concept of DateTimeKind - EF Core

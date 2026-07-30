@@ -132,5 +132,16 @@
   "SyncOffers": "Sync Offers",
   "NoOffersYet": "No offers yet - click \"Sync Offers\" to import from the middleware.",
   "Big": "Big",
-  "NoProductsInOffer": "No products linked to this offer yet."
+  "NoProductsInOffer": "No products linked to this offer yet.",
+
+  "PromoCodes": "Promo Codes",
+  "SyncPromoCodes": "Sync Promo Codes",
+  "NoPromoCodesYet": "No promo codes yet - click \"Sync Promo Codes\" to import from the middleware.",
+  "Code": "Code",
+  "DiscountType": "Discount Type",
+  "Percentage": "Percentage",
+  "FixedAmount": "Fixed Amount",
+  "MinOrderAmount": "Min. Order",
+  "Usage": "Usage",
+  "Unlimited": "Unlimited"
 }

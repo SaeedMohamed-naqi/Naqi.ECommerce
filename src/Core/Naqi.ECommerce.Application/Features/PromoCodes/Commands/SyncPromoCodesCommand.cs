@@ -40,14 +40,22 @@ public class SyncPromoCodesCommandHandler : IRequestHandler<SyncPromoCodesComman
         {
             var response = await _middlewareClient.GetCouponsAsync(cancellationToken);
 
+            // Safety guard: an empty response is ambiguous between
+            // "genuinely no active coupons" and a transient/broken API
+            // response - skip the disappearance check entirely rather
+            // than risk soft-deleting every promo code on a hiccup.
             if (response.Coupons.Count == 0)
                 return new SyncPromoCodesResult(0, 0, 0, Success: true);
 
             // Bulk-load every existing PromoCode this response references,
             // in one query, instead of a query+save per coupon.
+            // IgnoreQueryFilters() so a previously soft-deleted promo code
+            // can be found and RESTORED if it becomes active again,
+            // instead of creating a duplicate.
             var externalIds = response.Coupons.Select(c => c.Id).Distinct().ToList();
 
             var existingPromoCodes = (await _context.PromoCodes
+                    .IgnoreQueryFilters()
                     .Where(p => externalIds.Contains(p.ExternalPromoId))
                     .ToListAsync(cancellationToken))
                 .ToDictionary(p => p.ExternalPromoId);
@@ -64,6 +72,9 @@ public class SyncPromoCodesCommandHandler : IRequestHandler<SyncPromoCodesComman
 
                 if (existingPromoCodes.TryGetValue(coupon.Id, out var existing))
                 {
+                    if (existing.IsDeleted)
+                        existing.Restore(); // active again after disappearing from a previous sync
+
                     existing.UpdateFromSync(syncData);
                     updated++;
                 }
@@ -74,6 +85,19 @@ public class SyncPromoCodesCommandHandler : IRequestHandler<SyncPromoCodesComman
                     existingPromoCodes[coupon.Id] = newPromoCode;
                     created++;
                 }
+            }
+
+            // This endpoint returns only currently-active coupons - any
+            // PromoCode still active in our DB but absent here is no
+            // longer active at the source (expired/removed/etc.), so
+            // soft-delete it rather than leaving stale data around.
+            var disappeared = await _context.PromoCodes
+                .Where(p => !externalIds.Contains(p.ExternalPromoId))
+                .ToListAsync(cancellationToken);
+
+            foreach (var promoCode in disappeared)
+            {
+                promoCode.SoftDelete(Naqi.ECommerce.Domain.Common.ChildCollectionSyncer.SyncNotPresentReason);
             }
 
             await _context.SaveChangesAsync(cancellationToken);

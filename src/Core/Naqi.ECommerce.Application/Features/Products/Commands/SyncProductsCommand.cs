@@ -27,6 +27,7 @@
 // Net result: ~5-6 round trips per page instead of hundreds.
 
 using MediatR;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Naqi.ECommerce.Application.Common.Interfaces;
@@ -68,6 +69,7 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         var totalFetched = 0;
         var totalCreated = 0;
         var totalUpdated = 0;
+        var allSeenExternalIds = new HashSet<long>();
 
         try
         {
@@ -85,8 +87,37 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
                 totalUpdated += updated;
                 totalFetched += page.Data.Count;
 
+                foreach (var item in page.Data)
+                    allSeenExternalIds.Add(item.ProductId);
+
                 hasMore = page.Data.Count == PageSize;
                 skip += page.Data.Count;
+            }
+
+            // A full sync run just walked every page the middleware has -
+            // anything still active in our DB but never seen this run no
+            // longer exists at the source, so soft-delete it (not a hard
+            // delete - Orders may still reference it historically).
+            //
+            // Safety guard: if we never saw ANY product this run
+            // (allSeenExternalIds is empty), skip this entirely rather than
+            // soft-deleting the whole catalog - an empty/failed first page
+            // is ambiguous between "genuinely no products" and a transient
+            // API glitch, and wiping every product because of a hiccup is
+            // far too risky to do automatically.
+            if (allSeenExternalIds.Count > 0)
+            {
+                var disappeared = await _context.Products
+                    .Where(p => !allSeenExternalIds.Contains(p.ExternalProductId))
+                    .ToListAsync(cancellationToken);
+
+                foreach (var product in disappeared)
+                {
+                    product.SoftDelete(Naqi.ECommerce.Domain.Common.ChildCollectionSyncer.SyncNotPresentReason);
+                }
+
+                if (disappeared.Count > 0)
+                    await _context.SaveChangesAsync(cancellationToken);
             }
 
             return new SyncProductsResult(totalFetched, totalCreated, totalUpdated, Success: true);
@@ -106,13 +137,28 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         // ---- 1. Bulk-load existing products for this whole page ----
         var externalProductIds = items.Select(i => i.ProductId).ToList();
 
+        // IgnoreQueryFilters() here is intentional - a product that
+        // disappeared in a prior sync (soft-deleted) needs to be findable
+        // again so it can be RESTORED if it reappears, instead of the
+        // default filter hiding it and causing a duplicate insert.
+        //
+        // AsSplitQuery() is important here: five .Include()s in one query
+        // would otherwise generate a single SQL statement with five JOINs,
+        // and the row count multiplies across every combination (a product
+        // with 10 specs x 3 variants x 2 offers returns 60 duplicated rows
+        // of the product's own columns, repeated per combination) - for
+        // 100 products with realistic child counts that's enormous
+        // over-fetching. AsSplitQuery() issues one query per collection
+        // instead, so each row is only fetched once.
         var existingProducts = (await _context.Products
+                .IgnoreQueryFilters()
                 .Include(p => p.Specifications)
                 .Include(p => p.UiCategories)
                 .Include(p => p.Installations)
                 .Include(p => p.Variants)
                 .Include(p => p.Offers)
-                .Where(p => externalProductIds.Contains(p.ExternalProductId))
+                
+                 .Where(p => externalProductIds.Contains(p.ExternalProductId))
                 .ToListAsync(cancellationToken))
             .ToDictionary(p => p.ExternalProductId);
 
@@ -152,38 +198,28 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
                 ?? item.Variants?.FirstOrDefault()?.ProductQnty
                 ?? item.Quantity;
 
-            var syncData = new ProductSyncData(
-                NameEn: item.ProductNameEn,
-                NameAr: item.ProductNameAr,
-                Sku: item.ProductId.ToString(), // middleware doesn't expose a separate SKU - product_id doubles as one
-                ExternalProductId: item.ProductId,
-                Price: item.OnSalePrice,
-                OldPrice: item.ProductPrice != item.OnSalePrice ? item.ProductPrice : null,
-                StockQuantity: quantity,
-                CategoryId: categoryId,
-                ImageUrl: imageUrl,
-                AllImageUrls: allImageUrls,
-                TitleEn: item.ProductTitleEn,
-                TitleAr: item.ProductTitleAr,
-                DescriptionEn: item.ProductDescriptionEn,
-                DescriptionAr: item.ProductDescriptionAr,
-                TagEn: item.Tag,
-                TagAr: item.TagAr,
-                SubtagEn: item.Subtag,
-                SubtagAr: item.SubtagAr,
-                TagColor: item.TagColor,
-                SubtagIconUrl: item.Subtagicon,
-                IsVertical: item.IsVertical == 1,
-                RatingAverage: item.RatingAverage,
-                TotalRating: item.TotalRating,
-                WebsiteWarranty: item.WebsiteWarranty,
-                WebsiteAccessories: item.WebsiteAccessories,
-                WebsiteGuidelines: item.WebsiteGuidelines,
-                WebsiteOtherSpecs: item.WebsiteOtherSpecs);
+            // Mapster handles every plain-rename/same-name field (see
+            // MappingConfig's MiddlewareProduct -> ProductSyncData
+            // registration) - only the genuinely COMPUTED fields (things
+            // that need actual logic, not a field copy) are patched in
+            // via `with` afterward.
+            var syncData = item.Adapt<ProductSyncData>() with
+            {
+                Sku = item.ProductId.ToString(), // middleware doesn't expose a separate SKU - product_id doubles as one
+                OldPrice = item.ProductPrice != item.OnSalePrice ? item.ProductPrice : null,
+                StockQuantity = quantity,
+                CategoryId = categoryId,
+                ImageUrl = imageUrl,
+                AllImageUrls = allImageUrls,
+                IsVertical = item.IsVertical == 1
+            };
 
             Product product;
             if (existingProducts.TryGetValue(item.ProductId, out var existing))
             {
+                if (existing.IsDeleted)
+                    existing.Restore(); // reappeared after being gone in a previous sync
+
                 existing.UpdateFromSync(syncData);
                 product = existing;
                 updated++;
@@ -248,6 +284,7 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         var neededIds = neededCategories.Select(c => c.CategoryId).ToList();
 
         var existing = (await _context.Categories
+                .IgnoreQueryFilters() // find-and-restore previously soft-deleted categories instead of duplicating
                 .Where(c => c.ExternalCategoryId != null && neededIds.Contains(c.ExternalCategoryId!.Value))
                 .ToListAsync(cancellationToken))
             .ToDictionary(c => c.ExternalCategoryId!.Value);
@@ -256,6 +293,9 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         {
             if (existing.TryGetValue(categoryData.CategoryId, out var existingCategory))
             {
+                if (existingCategory.IsDeleted)
+                    existingCategory.Restore();
+
                 existingCategory.UpdateFromSync(categoryData.NameEn, categoryData.NameAr, categoryData.Image);
             }
             else
@@ -285,10 +325,16 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         }
 
         var uncategorized = await _context.Categories
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(c => c.Slug == UncategorizedSlug, cancellationToken);
 
         if (uncategorized is not null)
+        {
+            if (uncategorized.IsDeleted)
+                uncategorized.Restore();
+
             return uncategorized;
+        }
 
         var newUncategorized = new Category("Uncategorized", "غير مصنف", externalCategoryId: null, imageUrl: null, slug: UncategorizedSlug);
         _context.Categories.Add(newUncategorized);
@@ -313,6 +359,7 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
         var neededIds = neededOffers.Select(o => o.OfferGroupId).ToList();
 
         var existing = (await _context.OfferGroups
+                .IgnoreQueryFilters() // find-and-restore previously soft-deleted offer groups instead of duplicating
                 .Where(g => neededIds.Contains(g.ExternalOfferGroupId))
                 .ToListAsync(cancellationToken))
             .ToDictionary(g => g.ExternalOfferGroupId);
@@ -329,6 +376,9 @@ public class SyncProductsCommandHandler : IRequestHandler<SyncProductsCommand, S
 
             if (existing.TryGetValue(offer.OfferGroupId, out var existingGroup))
             {
+                if (existingGroup.IsDeleted)
+                    existingGroup.Restore();
+
                 existingGroup.UpdateFromSync(nameEn, nameAr, iconUrl, color, isBig, expireAtUtc);
             }
             else

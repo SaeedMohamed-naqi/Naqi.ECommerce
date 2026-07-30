@@ -182,146 +182,81 @@ public class Product : BaseAuditableEntity
         LastSyncedAtUtc = DateTime.UtcNow;
     }
 
-    // Upserts + prunes the specification collection as one operation, so
-    // the Product aggregate is always left in a consistent state: any
-    // spec no longer present in `incoming` is removed (the middleware is
-    // the source of truth), matching ones are updated, new ones are added.
-    // This logic lives here (not in the sync command handler) because
-    // "what does it mean to sync a product's specs" is a rule about the
-    // Product aggregate, not an application-layer orchestration concern.
+    // Upserts the specification collection using soft delete instead of
+    // hard removal - anything no longer present in `incoming` is flagged
+    // deleted (not actually removed), and restored automatically if it
+    // reappears in a later sync. This logic lives here (not in the sync
+    // command handler) because "what does it mean to sync a product's
+    // specs" is a rule about the Product aggregate, not an
+    // application-layer orchestration concern.
     public void SyncSpecifications(IEnumerable<ProductSpecificationSyncData> incoming)
     {
-        var incomingList = incoming.ToList();
-        var incomingIds = incomingList.Select(s => s.ExternalSpecificationId).ToHashSet();
-
-        _specifications.RemoveAll(s => !incomingIds.Contains(s.ExternalSpecificationId));
-
-        foreach (var specData in incomingList)
-        {
-            var existing = _specifications.FirstOrDefault(s => s.ExternalSpecificationId == specData.ExternalSpecificationId);
-
-            if (existing is not null)
-            {
-                existing.UpdateFromSync(specData.TitleEn, specData.TitleAr, specData.ValueEn, specData.ValueAr);
-            }
-            else
-            {
-                // Id may still be 0 here for a brand-new Product not yet
-                // saved - that's fine, EF Core's relationship fixup
-                // corrects ProductId automatically at SaveChanges time
-                // based on the navigation collection, regardless of what's
-                // set here in memory.
-                _specifications.Add(new ProductSpecification(
-                    Id, specData.ExternalSpecificationId,
-                    specData.TitleEn, specData.TitleAr, specData.ValueEn, specData.ValueAr));
-            }
-        }
+        ChildCollectionSyncer.Sync(
+            _specifications, incoming,
+            externalIdOf: s => s.ExternalSpecificationId,
+            childExternalIdOf: s => s.ExternalSpecificationId,
+            updateExisting: (existing, data) => existing.UpdateFromSync(data.TitleEn, data.TitleAr, data.ValueEn, data.ValueAr),
+            // Id may still be 0 here for a brand-new Product not yet saved -
+            // that's fine, EF Core's relationship fixup corrects ProductId
+            // automatically at SaveChanges time based on the navigation
+            // collection, regardless of what's set here in memory.
+            createNew: data => new ProductSpecification(
+                Id, data.ExternalSpecificationId, data.TitleEn, data.TitleAr, data.ValueEn, data.ValueAr));
     }
 
-    // Same upsert-and-prune pattern as SyncSpecifications, for the
-    // middleware's ui_categories array.
+    // Same pattern as SyncSpecifications, for the middleware's
+    // ui_categories array.
     public void SyncUiCategories(IEnumerable<ProductCategorySyncData> incoming)
     {
-        var incomingList = incoming.ToList();
-        var incomingIds = incomingList.Select(c => c.ExternalCategoryId).ToHashSet();
-
-        _uiCategories.RemoveAll(c => !incomingIds.Contains(c.ExternalCategoryId));
-
-        foreach (var catData in incomingList)
-        {
-            var existing = _uiCategories.FirstOrDefault(c => c.ExternalCategoryId == catData.ExternalCategoryId);
-
-            if (existing is not null)
-            {
-                existing.UpdateFromSync(catData.NameEn, catData.NameAr, catData.Slug, catData.ImageUrl, catData.IsPrimary, catData.IsLeaf);
-            }
-            else
-            {
-                _uiCategories.Add(new ProductCategory(
-                    Id, catData.ExternalCategoryId, catData.NameEn, catData.NameAr,
-                    catData.Slug, catData.ImageUrl, catData.IsPrimary, catData.IsLeaf));
-            }
-        }
+        ChildCollectionSyncer.Sync(
+            _uiCategories, incoming,
+            externalIdOf: c => c.ExternalCategoryId,
+            childExternalIdOf: c => c.ExternalCategoryId,
+            updateExisting: (existing, data) => existing.UpdateFromSync(data.NameEn, data.NameAr, data.Slug, data.ImageUrl, data.IsPrimary, data.IsLeaf),
+            createNew: data => new ProductCategory(
+                Id, data.ExternalCategoryId, data.NameEn, data.NameAr, data.Slug, data.ImageUrl, data.IsPrimary, data.IsLeaf));
     }
 
-    // Same upsert-and-prune pattern, for the middleware's
-    // product_installations array.
+    // Same pattern, for the middleware's product_installations array.
     public void SyncInstallations(IEnumerable<ProductInstallationSyncData> incoming)
     {
-        var incomingList = incoming.ToList();
-        var incomingIds = incomingList.Select(i => i.ExternalInstallationId).ToHashSet();
-
-        _installations.RemoveAll(i => !incomingIds.Contains(i.ExternalInstallationId));
-
-        foreach (var instData in incomingList)
-        {
-            var existing = _installations.FirstOrDefault(i => i.ExternalInstallationId == instData.ExternalInstallationId);
-
-            if (existing is not null)
-            {
-                existing.UpdateFromSync(instData.TitleEn, instData.TitleAr, instData.Price, instData.IsSelected);
-            }
-            else
-            {
-                _installations.Add(new ProductInstallation(
-                    Id, instData.ExternalInstallationId,
-                    instData.TitleEn, instData.TitleAr, instData.Price, instData.IsSelected));
-            }
-        }
+        ChildCollectionSyncer.Sync(
+            _installations, incoming,
+            externalIdOf: i => i.ExternalInstallationId,
+            childExternalIdOf: i => i.ExternalInstallationId,
+            updateExisting: (existing, data) => existing.UpdateFromSync(data.TitleEn, data.TitleAr, data.Price, data.IsSelected),
+            createNew: data => new ProductInstallation(
+                Id, data.ExternalInstallationId, data.TitleEn, data.TitleAr, data.Price, data.IsSelected));
     }
 
-    // Same upsert-and-prune pattern, for the middleware's variants array.
+    // Same pattern, for the middleware's variants array.
     public void SyncVariants(IEnumerable<ProductVariantSyncData> incoming)
     {
-        var incomingList = incoming.ToList();
-        var incomingIds = incomingList.Select(v => v.ExternalVariantId).ToHashSet();
-
-        _variants.RemoveAll(v => !incomingIds.Contains(v.ExternalVariantId));
-
-        foreach (var varData in incomingList)
-        {
-            var existing = _variants.FirstOrDefault(v => v.ExternalVariantId == varData.ExternalVariantId);
-
-            if (existing is not null)
-            {
-                existing.UpdateFromSync(
-                    varData.NameEn, varData.NameAr, varData.ColorEn, varData.ColorAr, varData.ColorCode,
-                    varData.Price, varData.OldPrice, varData.StockQuantity, varData.ImageUrl);
-            }
-            else
-            {
-                _variants.Add(new ProductVariant(
-                    Id, varData.ExternalVariantId, varData.NameEn, varData.NameAr,
-                    varData.ColorEn, varData.ColorAr, varData.ColorCode,
-                    varData.Price, varData.OldPrice, varData.StockQuantity, varData.ImageUrl));
-            }
-        }
+        ChildCollectionSyncer.Sync(
+            _variants, incoming,
+            externalIdOf: v => v.ExternalVariantId,
+            childExternalIdOf: v => v.ExternalVariantId,
+            updateExisting: (existing, data) => existing.UpdateFromSync(
+                data.NameEn, data.NameAr, data.ColorEn, data.ColorAr, data.ColorCode,
+                data.Price, data.OldPrice, data.StockQuantity, data.ImageUrl),
+            createNew: data => new ProductVariant(
+                Id, data.ExternalVariantId, data.NameEn, data.NameAr,
+                data.ColorEn, data.ColorAr, data.ColorCode,
+                data.Price, data.OldPrice, data.StockQuantity, data.ImageUrl));
     }
 
-    // Same upsert-and-prune pattern, for the middleware's offers array.
-    // OfferGroupId in each incoming item is already resolved (created if
-    // needed) by the caller, since that requires DB access this entity
-    // can't perform itself - see SyncProductsCommandHandler.ResolveOfferGroupAsync.
+    // Same pattern, for the middleware's offers array. OfferGroupId in
+    // each incoming item is already resolved (created if needed) by the
+    // caller, since that requires DB access this entity can't perform
+    // itself - see SyncProductsCommandHandler's offer-group resolution.
     public void SyncOffers(IEnumerable<ProductOfferSyncData> incoming)
     {
-        var incomingList = incoming.ToList();
-        var incomingIds = incomingList.Select(o => o.ExternalOfferId).ToHashSet();
-
-        _offers.RemoveAll(o => !incomingIds.Contains(o.ExternalOfferId));
-
-        foreach (var offerData in incomingList)
-        {
-            var existing = _offers.FirstOrDefault(o => o.ExternalOfferId == offerData.ExternalOfferId);
-
-            if (existing is not null)
-            {
-                existing.UpdateFromSync(offerData.OfferGroupId, offerData.IsActive);
-            }
-            else
-            {
-                _offers.Add(new ProductOffer(Id, offerData.ExternalOfferId, offerData.OfferGroupId, offerData.IsActive));
-            }
-        }
+        ChildCollectionSyncer.Sync(
+            _offers, incoming,
+            externalIdOf: o => o.ExternalOfferId,
+            childExternalIdOf: o => o.ExternalOfferId,
+            updateExisting: (existing, data) => existing.UpdateFromSync(data.OfferGroupId, data.IsActive),
+            createNew: data => new ProductOffer(Id, data.ExternalOfferId, data.OfferGroupId, data.IsActive));
     }
 }
 

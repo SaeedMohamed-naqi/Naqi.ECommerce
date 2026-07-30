@@ -16,7 +16,7 @@ using Naqi.ECommerce.Domain.Common;
 
 namespace Naqi.ECommerce.Domain.Entities;
 
-public class ProductCategory : BaseEntity
+public class ProductCategory : BaseAuditableEntity
 {
     public long ProductId { get; private set; }
 
