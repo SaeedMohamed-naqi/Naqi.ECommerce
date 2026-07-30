@@ -71,6 +71,7 @@ builder.Services.AddOptions<MvcOptions>()
         });
 
 var app = builder.Build();
+await app.MigrateNaqiDatabaseAsync();
 
 // ---- Seed roles + default SuperAdmin user on startup ----
 using (var scope = app.Services.CreateScope())

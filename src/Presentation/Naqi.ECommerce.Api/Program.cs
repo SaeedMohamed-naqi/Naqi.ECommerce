@@ -61,6 +61,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddNaqiSwagger(); // see Extensions/SwaggerServiceExtensions.cs
 
 var app = builder.Build();
+await app.MigrateNaqiDatabaseAsync();
 
 app.UseNaqiSwagger(); // config-driven (Swagger:Enabled) - see SwaggerServiceExtensions
 
