@@ -29,7 +29,7 @@ public static class IdentitySeeder
         var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger("IdentitySeeder");
 
         // ---- 1. Ensure roles exist ----
-        foreach (var roleName in new[] { Roles.SuperAdmin, Roles.Admin, Roles.Manager })
+        foreach (var roleName in new[] { Roles.SuperAdmin, Roles.Admin, Roles.Manager, Roles.User })
         {
             if (!await roleManager.RoleExistsAsync(roleName))
             {

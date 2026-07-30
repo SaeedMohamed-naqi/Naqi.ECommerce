@@ -7,7 +7,9 @@
 
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.IdentityModel.Tokens;
+using Naqi.ECommerce.Api.Extensions;
 using Naqi.ECommerce.Application;
 using Naqi.ECommerce.Infrastructure;
 
@@ -16,8 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ---- Layers ----
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddNaqiLocalization(
-    Path.Combine(AppContext.BaseDirectory, "Resources"));
+builder.Services.AddNaqiLocalization(Path.Combine(AppContext.BaseDirectory, "wwwroot", "Resources"));
 
 // ---- JWT bearer auth (Next.js sends Authorization: Bearer <token>) ----
 var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -43,9 +44,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 // ---- CORS - Next.js runs on a different origin ----
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-    ?? Array.Empty<string>();
-
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NextJsStorefront", policy =>
@@ -59,29 +58,23 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddNaqiSwagger(); // see Extensions/SwaggerServiceExtensions.cs
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseNaqiSwagger(); // config-driven (Swagger:Enabled) - see SwaggerServiceExtensions
 
 app.UseMiddleware<Naqi.ECommerce.Api.Middleware.ExceptionHandlingMiddleware>();
-
 app.UseHttpsRedirection();
 
+// RequestLocalizationOptions lives in Microsoft.AspNetCore.Localization,
+// NOT Microsoft.AspNetCore.Builder - that mismatch was the earlier build error.
 var localizationOptions = app.Services
-    .GetRequiredService<Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Builder.RequestLocalizationOptions>>().Value;
+    .GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
 
 app.UseCors("NextJsStorefront");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

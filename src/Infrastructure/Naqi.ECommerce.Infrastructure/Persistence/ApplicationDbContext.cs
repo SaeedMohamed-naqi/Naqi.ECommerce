@@ -35,7 +35,8 @@ public class ApplicationDbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<CategoryBanner> CategoryBanners => Set<CategoryBanner>();
     public DbSet<PromoCode> PromoCodes => Set<PromoCode>();
-  
+    public DbSet<Customer> Customers => Set<Customer>();
+ 
 
     // Auto-populates CreatedBy/CreatedAtUtc on insert and
     // LastModifiedBy/LastModifiedAtUtc on update, for every entity that
@@ -136,6 +137,36 @@ public class ApplicationDbContext
                 .WithMany()
                 .HasForeignKey(o => o.OfferGroupId)
                 .OnDelete(DeleteBehavior.Restrict); // never cascade-delete shared OfferGroup rows via a product offer
+        });
+
+        // ---- Customer -> ApplicationUser (cross-layer FK, no navigation) ----
+        // Customer lives in Domain and must not reference ApplicationUser
+        // (Infrastructure.Identity) directly - Clean Architecture's
+        // dependency rule. HasOne<ApplicationUser>() with no navigation
+        // expression on either side configures a real FK constraint at
+        // the database level without either C# type needing to know about
+        // the other. IsRequired(false) since guest customers have no
+        // ApplicationUserId at all. Restrict (not Cascade) - deleting an
+        // Identity user should never silently delete their order/customer
+        // history.
+        builder.Entity<Customer>(entity =>
+        {
+            entity.HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<Customer>(c => c.ApplicationUserId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Unique even though nullable - SQL Server allows multiple
+            // NULLs through a unique index (each NULL is treated as
+            // distinct), so any number of guest customers can coexist,
+            // but two Customer rows can never point at the same real
+            // ApplicationUserId.
+            entity.HasIndex(c => c.ApplicationUserId).IsUnique();
+
+            // Supports looking a guest customer back up by the token
+            // stored in their browser (see Customer.GuestToken).
+            entity.HasIndex(c => c.GuestToken).IsUnique();
         });
 
         // ---- Indexes on sync lookup columns ----

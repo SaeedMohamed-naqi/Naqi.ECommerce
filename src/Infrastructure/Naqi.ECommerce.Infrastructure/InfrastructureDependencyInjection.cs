@@ -34,6 +34,7 @@ public static class DependencyInjection
 
         services.Identity_Setup();
         services.NaqiMiddleware_Setup(configuration);
+        services.RefisterServices(configuration);
 
         
         return services;
@@ -68,12 +69,24 @@ public static class DependencyInjection
     }
     static void NaqiMiddleware_Setup(this IServiceCollection services, IConfiguration configuration)
     {
-        var middlewareBaseUrl = configuration["NaqiMiddleware:BaseUrl"]    ?? throw new InvalidOperationException("NaqiMiddleware:BaseUrl is not configured.");
+        var middlewareBaseUrl = configuration["NaqiMiddleware:BaseUrl"]    ??"";// throw new InvalidOperationException("NaqiMiddleware:BaseUrl is not configured.");
 
         services.AddHttpClient<Naqi.ECommerce.Application.Common.Interfaces.INaqiMiddlewareClient, Naqi.ECommerce.Infrastructure.ExternalServices.NaqiMiddleware.NaqiMiddlewareClient>(client =>
         {
             client.BaseAddress = new Uri(middlewareBaseUrl);
             client.Timeout = TimeSpan.FromSeconds(60);
         });
+    }
+
+
+    static void RefisterServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<Naqi.ECommerce.Application.Common.Interfaces.ISmsSender,
+      Naqi.ECommerce.Infrastructure.ExternalServices.Sms.LoggingSmsSender>();
+        services.AddScoped<Naqi.ECommerce.Application.Common.Interfaces.IJwtTokenGenerator,
+            Naqi.ECommerce.Infrastructure.Identity.JwtTokenGenerator>();
+        services.AddHttpClient<Naqi.ECommerce.Application.Common.Interfaces.ISmsSender,
+            Naqi.ECommerce.Infrastructure.ExternalServices.Sms.TaqnyatSmsSender>();
+
     }
 }

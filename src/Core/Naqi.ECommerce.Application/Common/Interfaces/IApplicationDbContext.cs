@@ -24,6 +24,7 @@ public interface IApplicationDbContext
     DbSet<ProductOffer> ProductOffers { get; }
     DbSet<Category> Categories { get; }
     DbSet<CategoryBanner> CategoryBanners { get; }
-     
+    DbSet<Customer> Customers { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

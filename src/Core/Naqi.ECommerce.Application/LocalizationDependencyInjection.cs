@@ -29,7 +29,7 @@ public static class LocalizationDependencyInjection
 {
     // Single source of truth for supported cultures across the whole solution.
     public static readonly string[] SupportedCultures = { "en", "ar" };
-    public const string DefaultCulture = "en";
+    public const string DefaultCulture = "ar";
 
     /// <param name="resourcesRootPath">
     /// Absolute path to the folder containing *.{culture}.json files.

@@ -143,5 +143,21 @@
   "FixedAmount": "Fixed Amount",
   "MinOrderAmount": "Min. Order",
   "Usage": "Usage",
-  "Unlimited": "Unlimited"
+  "Unlimited": "Unlimited",
+
+  "RegistrationFieldsRequired": "Phone, email, and password are all required.",
+  "AccountAlreadyExists": "An account with this phone number or email already exists.",
+  "RegistrationFailed": "Registration failed.",
+  "RegistrationSuccessOtpSent": "Registration successful - a verification code has been sent to your phone.",
+  "UserNotFound": "User not found.",
+  "PhoneNotFound": "No account found with this phone number.",
+  "OtpExpired": "The verification code has expired - please request a new one.",
+  "OtpMaxAttemptsExceeded": "Too many attempts - please request a new code.",
+  "OtpIncorrect": "Incorrect verification code.",
+  "OtpVerifiedSuccess": "Phone number verified successfully.",
+  "PhoneAlreadyConfirmed": "This phone number is already confirmed.",
+  "OtpResentSuccess": "A new code has been sent.",
+  "OtpResendCooldown": "You can resend the code after {0} seconds.",
+  "OtpResendLimitExceeded": "You've exceeded the number of resend attempts.",
+  "OtpSmsMessage": "Your verification code is: {0}"
 }

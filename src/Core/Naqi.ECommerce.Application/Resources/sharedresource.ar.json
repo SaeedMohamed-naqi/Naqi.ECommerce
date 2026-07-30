@@ -143,5 +143,21 @@
   "FixedAmount": "مبلغ ثابت",
   "MinOrderAmount": "الحد الأدنى للطلب",
   "Usage": "الاستخدام",
-  "Unlimited": "غير محدود"
+  "Unlimited": "غير محدود",
+
+  "RegistrationFieldsRequired": "رقم الهاتف والبريد الإلكتروني وكلمة المرور كلها مطلوبة.",
+  "AccountAlreadyExists": "يوجد حساب بالفعل بهذا الرقم أو البريد الإلكتروني.",
+  "RegistrationFailed": "فشل التسجيل.",
+  "RegistrationSuccessOtpSent": "تم التسجيل بنجاح، تم إرسال رمز التحقق إلى هاتفك.",
+  "UserNotFound": "المستخدم غير موجود.",
+  "PhoneNotFound": "رقم الهاتف غير موجود.",
+  "OtpExpired": "رمز التحقق منتهي الصلاحية، يرجى طلب رمز جديد.",
+  "OtpMaxAttemptsExceeded": "تم تجاوز عدد المحاولات المسموح بها، يرجى طلب رمز جديد.",
+  "OtpIncorrect": "رمز التحقق غير صحيح.",
+  "OtpVerifiedSuccess": "تم التحقق بنجاح.",
+  "PhoneAlreadyConfirmed": "رقم الهاتف مؤكد بالفعل.",
+  "OtpResentSuccess": "تم إعادة إرسال الرمز.",
+  "OtpResendCooldown": "يمكن إعادة الإرسال بعد {0} ثانية.",
+  "OtpResendLimitExceeded": "تم تجاوز عدد مرات إعادة الإرسال.",
+  "OtpSmsMessage": "رمز كود التفعيل هو: {0}"
 }

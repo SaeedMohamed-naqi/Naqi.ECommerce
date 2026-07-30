@@ -9,6 +9,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.18" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.18">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
@@ -16,5 +20,10 @@
     <ProjectReference Include="..\..\Core\Naqi.ECommerce.Application\Naqi.ECommerce.Application.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Naqi.ECommerce.Infrastructure\Naqi.ECommerce.Infrastructure.csproj" />
   </ItemGroup>
-
+	<ItemGroup>
+		<None Include="..\..\Core\Naqi.ECommerce.Application\Resources\*.json">
+			<Link>wwwroot\Resources\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
